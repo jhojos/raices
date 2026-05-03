@@ -635,6 +635,8 @@ textarea{resize:none;height:72px;line-height:1.5}
  </div>
 </div>
 
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/d3/7.8.5/d3.min.js"></script>
 <script>
 const RN=23,CIRC=2*Math.PI*RN;
@@ -1744,24 +1746,57 @@ let _fbRef=null,_fbSetDoc=null,_unsubscribe=null;
 function openFbModal(){const s=localStorage.getItem(FB_KEY);if(s)document.getElementById('fb-cfg-txt').value=s;document.getElementById('fb-modal').classList.add('open');}
 function closeFbModal(){document.getElementById('fb-modal').classList.remove('open');}
 function normCfg(raw){try{const cleaned=raw.trim().replace(/\/\/.*/g,'').replace(/,\s*}/g,'}').replace(/([{,]\s*)([a-zA-Z]+)\s*:/g,'$1"$2":');return JSON.parse(cleaned);}catch(e){return null;}}
-async function connectFirebase(){const raw=document.getElementById('fb-cfg-txt')?.value?.trim();if(!raw){toast('Pega el objeto firebaseConfig primero','err');return;}const cfg=normCfg(raw);if(!cfg?.apiKey||!cfg?.projectId){toast('Formato incorrecto — copia el objeto { ... } completo','err');return;}localStorage.setItem(FB_KEY,raw);closeFbModal();await initFirebase(cfg);}
-async function initFirebase(cfgRaw){
-  const cfg=typeof cfgRaw==='string'?normCfg(cfgRaw):cfgRaw;if(!cfg)return;
+function connectFirebase(){const raw=document.getElementById('fb-cfg-txt')?.value?.trim();if(!raw){toast('Pega el objeto firebaseConfig primero','err');return;}const cfg=normCfg(raw);if(!cfg?.apiKey||!cfg?.projectId){toast('Formato incorrecto — copia el objeto { ... } completo','err');return;}localStorage.setItem(FB_KEY,raw);closeFbModal();initFirebase(cfg);}
+function initFirebase(cfgRaw){
+  const cfg=typeof cfgRaw==='string'?normCfg(cfgRaw):cfgRaw;
+  if(!cfg)return;
   setSyncStatus('busy','Conectando…');
   try{
-    const{initializeApp,getApps}=await import('https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js');
-    const{getFirestore,doc,setDoc,onSnapshot,getDoc}=await import('https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js');
-    const apps=getApps();const app=apps.length?apps[0]:initializeApp(cfg);
-    const db=getFirestore(app);_fbSetDoc=setDoc;
-    const ref=doc(db,'raices','data');_fbRef=ref;
-    const snap=await getDoc(ref);
-    if(!snap.exists()||!snap.data()?.persons?.length){await setDoc(ref,{persons,relations,updatedAt:new Date().toISOString()});toast('🔥 Árbol subido — ¡ya pueden conectarse!','info');}
-    else{const d=snap.data();persons=d.persons;relations=d.relations;try{localStorage.setItem(SK,JSON.stringify({persons,relations}))}catch(e){}d3Nodes=[];updateGraph();toast(`🔥 Conectado · ${persons.length} personas`,'info');}
-    if(_unsubscribe)_unsubscribe();
-    _unsubscribe=onSnapshot(ref,snap=>{if(!snap.exists())return;const d=snap.data();if(d.updatedAt===window._lastPush)return;persons=d.persons;relations=d.relations;try{localStorage.setItem(SK,JSON.stringify({persons,relations}))}catch(e){}d3Nodes=[];updateGraph();setSyncStatus('ok',`En vivo · ${new Date().toLocaleTimeString('es',{hour:'2-digit',minute:'2-digit'})}`);addActivity('La familia','actualizó el árbol');});
-    setSyncStatus('ok','En vivo 🔥');
-  }catch(e){console.error(e);setSyncStatus('err','Error al conectar');toast('Error — verifica el firebaseConfig','err');}}
-async function pushToFirebase(){if(!_fbRef||!_fbSetDoc)return;try{const ts=new Date().toISOString();window._lastPush=ts;await _fbSetDoc(_fbRef,{persons,relations,updatedAt:ts});setSyncStatus('ok',`Guardado · ${new Date().toLocaleTimeString('es',{hour:'2-digit',minute:'2-digit'})}`)}catch(e){setSyncStatus('err','Error al guardar');}}
+    if(!firebase.apps.length)firebase.initializeApp(cfg);
+    const db=firebase.firestore();
+    const ref=db.collection('raices').doc('data');
+    ref.get().then(snap=>{
+      if(!snap.exists||!snap.data()?.persons?.length){
+        ref.set({persons,relations,updatedAt:new Date().toISOString()});
+        toast('🔥 Árbol subido — ¡ya pueden conectarse!','info');
+      } else {
+        const d=snap.data();
+        persons=d.persons;relations=d.relations;
+        try{localStorage.setItem(SK,JSON.stringify({persons,relations}))}catch(e){}
+        d3Nodes=[];updateGraph();
+        toast('🔥 Conectado · '+persons.length+' personas','info');
+      }
+      if(_unsubscribe)_unsubscribe();
+      _unsubscribe=ref.onSnapshot(snap=>{
+        if(!snap.exists)return;
+        const d=snap.data();
+        if(d.updatedAt===window._lastPush)return;
+        persons=d.persons;relations=d.relations;
+        try{localStorage.setItem(SK,JSON.stringify({persons,relations}))}catch(e){}
+        d3Nodes=[];updateGraph();
+        setSyncStatus('ok','En vivo · '+new Date().toLocaleTimeString('es',{hour:'2-digit',minute:'2-digit'}));
+        addActivity('La familia','actualizó el árbol');
+      });
+      setSyncStatus('ok','En vivo 🔥');
+    }).catch(e=>{
+      console.error(e);
+      setSyncStatus('err','Error al conectar');
+      toast('Error de conexión — verifica el config','err');
+    });
+  }catch(e){
+    console.error(e);
+    setSyncStatus('err','Error al conectar');
+    toast('Error — verifica el firebaseConfig','err');
+  }}
+function pushToFirebase(){
+  if(!firebase?.apps?.length)return;
+  try{
+    const ts=new Date().toISOString();window._lastPush=ts;
+    firebase.firestore().collection('raices').doc('data')
+      .set({persons,relations,updatedAt:ts})
+      .then(()=>setSyncStatus('ok',`Guardado · ${new Date().toLocaleTimeString('es',{hour:'2-digit',minute:'2-digit'})}`))
+      .catch(()=>setSyncStatus('err','Error al guardar'));
+  }catch(e){setSyncStatus('err','Error al guardar');}}
 
 // ── Resize ──
 window.addEventListener('resize',()=>{
@@ -1804,8 +1839,23 @@ if(!_seen&&!_hasData){
 }
 initGraph();
 const _fbStored=localStorage.getItem(FB_KEY);
-if(_fbStored)setTimeout(()=>initFirebase(_fbStored),700);
-else setSyncStatus('','Sin conectar');
+// Embedded Firebase config — auto-connects on any device without manual setup
+const _EMBEDDED={apiKey:"AIzaSyA9zZx16qZzfriHpWFwEth3bf11cLTB9ys",authDomain:"raices-e5d62.firebaseapp.com",projectId:"raices-e5d62",storageBucket:"raices-e5d62.firebasestorage.app",messagingSenderId:"402711416501",appId:"1:402711416501:web:39f60db8844da5b17e78fc"};
+function _tryConnect(cfg,attempt){
+  if(typeof firebase==='undefined'){
+    if(attempt<10)setTimeout(()=>_tryConnect(cfg,attempt+1),300);
+    else setSyncStatus('err','Firebase no cargó');
+    return;
+  }
+  initFirebase(cfg);
+}
+if(_fbStored){
+  setTimeout(()=>_tryConnect(_fbStored,0),500);
+}else{
+  const _s=JSON.stringify(_EMBEDDED);
+  try{localStorage.setItem(FB_KEY,_s)}catch(e){}
+  setTimeout(()=>_tryConnect(_EMBEDDED,0),500);
+}
 window.persons=persons;window.relations=relations;window.showProfile=showProfile;window.openPanel=openPanel;window.closePanel=closePanel;window.renderHL=renderHL;window.addRelativeOf=addRelativeOf;window.prevRel=prevRel;window.addPerson=addPerson;window.savePerson=savePerson;window.delPerson=delPerson;window.addRel=addRel;window.submitAR=submitAR;window.pickPhotoForm=pickPhotoForm;window.pickPhotoAR=pickPhotoAR;window.openFbModal=openFbModal;window.deleteRel=deleteRel;window.closeFbModal=closeFbModal;window.connectFirebase=connectFirebase;window.showWelcome=showWelcome;window.wzNext=wzNext;window.wzSkip=wzSkip;window.wzFinish=wzFinish;window.hideMagic=hideMagic;window.closeConfirm=closeConfirm;window.toggleHoy=toggleHoy;window._doAddPerson=_doAddPerson;window.openPDF=openPDF;window.exportData=exportData;window.importData=importData;
 
 // ══════ GEDCOM IMPORT ══════
