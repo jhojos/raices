@@ -1,0 +1,1897 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+<title>Raíces — Tu red familiar</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;500;600;700&family=DM+Sans:opsz,wght@9..40,300;9..40,400;9..40,500;9..40,600&display=swap');
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+html,body{height:100%;overflow:hidden;background:#0d1117}
+body{font-family:'DM Sans',system-ui,sans-serif;color:#1e293b}
+#bg{position:fixed;inset:0;z-index:0;background:#f7f3ee;overflow:hidden}
+#bg svg{position:absolute;inset:0;width:100%;height:100%;opacity:1;pointer-events:none}
+
+/* ── HEADER ── */
+#hd{position:fixed;top:0;left:0;right:0;height:56px;background:rgba(255,252,247,.97);border-bottom:1px solid #e8ddd0;display:flex;align-items:center;justify-content:space-between;padding:0 14px;z-index:30;backdrop-filter:blur(12px);box-shadow:0 1px 12px rgba(0,0,0,.06)}
+#logo{display:flex;align-items:center;gap:10px;cursor:default;text-decoration:none}
+#logo-leaf{width:30px;height:30px;background:linear-gradient(135deg,#22c55e,#16a34a);border-radius:50% 50% 50% 10%;display:flex;align-items:center;justify-content:center;font-size:15px;flex-shrink:0;box-shadow:0 2px 8px rgba(34,197,94,.3)}
+#logo-text{font-family:'Playfair Display',serif;font-size:18px;color:#14532d;font-weight:600;letter-spacing:-.3px}
+#hd-center{display:flex;align-items:center;gap:10px}
+.hst{background:#f0ebe2;border:1px solid #e2d5c3;border-radius:20px;padding:3px 11px;font-size:11px;color:#78563a;display:flex;align-items:center;gap:5px}
+.hst strong{color:#3d2b1a;font-weight:600}
+.hst .dot{width:5px;height:5px;border-radius:50%}
+#hd-right{display:flex;gap:5px;align-items:center}
+.hb{border:1px solid #ddd0bc;background:#fff;color:#78563a;border-radius:8px;padding:6px 11px;font-size:11.5px;cursor:pointer;font-family:inherit;transition:all .15s;white-space:nowrap;box-shadow:0 1px 3px rgba(0,0,0,.06)}
+.hb:hover{background:#f5ede0;border-color:#c4a882;color:#3d2b1a}
+.hb.pri{background:linear-gradient(135deg,#16a34a,#15803d);border-color:#16a34a;color:#fff;font-weight:600;box-shadow:0 2px 10px rgba(22,163,74,.3)}
+.hb.pri:hover{background:linear-gradient(135deg,#22c55e,#16a34a);box-shadow:0 3px 14px rgba(22,163,74,.4)}
+.hb.amber{background:linear-gradient(135deg,#d97706,#b45309);border-color:#d97706;color:#fff;font-weight:600;box-shadow:0 2px 8px rgba(217,119,6,.25)}
+.hb.amber:hover{background:linear-gradient(135deg,#f59e0b,#d97706)}
+#sync-pill{display:flex;align-items:center;gap:5px;padding:4px 10px;border-radius:20px;background:#f0ebe2;border:1px solid #ddd0bc;font-size:10.5px;color:#a8906c;cursor:pointer;box-shadow:0 1px 3px rgba(0,0,0,.05)}
+#sync-pill:hover{border-color:#c4a882;background:#ede4d6}
+#sync-dot{width:6px;height:6px;border-radius:50%;background:#d4c5b0;transition:all .3s;flex-shrink:0}
+#sync-dot.ok{background:#22c55e;box-shadow:0 0 6px rgba(34,197,94,.6)}
+#sync-dot.busy{background:#f59e0b;animation:pulse 1s infinite}
+#sync-dot.err{background:#ef4444}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.3}}
+#sync-lbl{white-space:nowrap}
+
+/* ── HOY EN TU FAMILIA ── */
+#hoy-wrap{position:fixed;top:56px;left:0;right:0;z-index:25;background:rgba(255,252,247,.97);border-bottom:1px solid #ede4d6;box-shadow:0 2px 8px rgba(0,0,0,.05);transition:transform .25s ease,opacity .25s ease;pointer-events:auto}
+#hoy-wrap.collapsed{transform:translateY(-100%);opacity:0;pointer-events:none}
+#hoy-inner{padding:9px 14px;display:flex;align-items:center;gap:12px;pointer-events:auto}
+#hoy-header{flex-shrink:0}
+#hoy-title{font-size:11.5px;font-weight:600;color:#78563a;display:flex;align-items:center;gap:5px}
+#hoy-sub{font-size:10px;color:#c4a882;margin-top:2px;white-space:nowrap}
+#hoy-cards{display:flex;gap:8px;overflow-x:auto;flex:1;scrollbar-width:none;padding:2px 0}
+#hoy-cards::-webkit-scrollbar{display:none}
+.hoy-card{display:flex;align-items:center;gap:9px;padding:8px 14px;border-radius:10px;cursor:pointer;transition:all .15s;flex-shrink:0;min-height:48px;border:1px solid transparent;min-width:200px;max-width:280px;pointer-events:auto}
+.hoy-card:hover{transform:translateY(-1px);box-shadow:0 3px 12px rgba(0,0,0,.12)}
+.hoy-card:active{transform:translateY(0);box-shadow:none}
+.hoy-card.birthday{background:#e8f4ff;border-color:#bfdbfe}
+.hoy-card.remember{background:#f5f3ff;border-color:#ddd6fe}
+.hoy-card.anniversary{background:#fdf2f8;border-color:#fbcfe8}
+.hoy-card.empty{background:#f9f5f0;border-color:#e8ddd0;cursor:default}
+.hoy-card.empty:hover{transform:none;box-shadow:none}
+.hoy-ico{font-size:18px;flex-shrink:0;line-height:1}
+.hoy-card-name{font-size:12.5px;font-weight:600;color:#1e293b;line-height:1.3;word-break:break-word;white-space:normal}
+.hoy-card-txt{font-size:11px;color:#64748b;margin-top:2px;line-height:1.35;white-space:normal}
+#hoy-toggle{flex-shrink:0;background:none;border:none;color:#c4a882;cursor:pointer;padding:4px 7px;border-radius:6px;font-size:11px;transition:all .15s;display:flex;align-items:center;gap:3px;white-space:nowrap;font-family:inherit}
+#hoy-toggle:hover{background:#f0e8dc;color:#78563a}
+#hoy-show-btn{position:fixed;top:57px;left:50%;transform:translateX(-50%);background:rgba(255,252,247,.95);border:1px solid #e2d5c3;border-radius:0 0 8px 8px;padding:3px 14px;font-size:10.5px;color:#a8906c;cursor:pointer;z-index:24;display:none;box-shadow:0 2px 8px rgba(0,0,0,.07);font-family:inherit}
+#hoy-show-btn.visible{display:block}
+/* ── BODY ── */
+#body{position:fixed;top:56px;left:0;right:0;bottom:0;z-index:1}
+#cvs{width:100%;height:100%;display:block;touch-action:none;pointer-events:auto}
+.grab{cursor:grab}.grabbing{cursor:grabbing}
+
+/* ── GEN LABEL ── */
+.gen-lbl{font-family:'DM Sans',sans-serif;fill:rgba(0,0,0,.18);font-size:10px;pointer-events:none}
+
+/* ── ONBOARDING WIZARD ── */
+#welcome{position:fixed;inset:0;z-index:200;display:flex;align-items:center;justify-content:center;padding:16px;background:rgba(245,240,232,.92);backdrop-filter:blur(8px)}
+#wc{background:#fff;border:1px solid #e2d5c3;border-radius:20px;padding:0;max-width:440px;width:100%;box-shadow:0 24px 60px rgba(0,0,0,.14);overflow:hidden}
+.wc-header{background:linear-gradient(135deg,#f0fdf4,#fff);border-bottom:1px solid #e8ddd0;padding:20px 24px 16px;display:flex;align-items:center;gap:12px}
+.wc-leaf{width:36px;height:36px;background:linear-gradient(135deg,#22c55e,#16a34a);border-radius:50% 50% 50% 10%;display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0}
+.wc-brand{font-family:'Playfair Display',serif;font-size:20px;color:#14532d;font-weight:600}
+.wc-prog-wrap{padding:0 24px;margin-top:14px}
+.wc-prog-track{background:#e8ddd0;border-radius:20px;height:4px;overflow:hidden}
+.wc-prog-fill{height:4px;background:linear-gradient(90deg,#16a34a,#22c55e);border-radius:20px;transition:width .4s ease}
+.wc-prog-lbl{display:flex;justify-content:space-between;font-size:10px;color:#c4a882;margin-top:5px}
+.wc-body{padding:20px 24px 24px}
+.wc-q{font-family:'Playfair Display',serif;font-size:19px;color:#0f172a;margin-bottom:6px;line-height:1.3}
+.wc-hint{font-size:12px;color:#a8906c;margin-bottom:16px;line-height:1.45}
+.wc-inp{background:#f9f5f0;border:1.5px solid #e2d5c3;border-radius:10px;padding:12px 14px;font-size:15px;width:100%;outline:none;font-family:'DM Sans',sans-serif;color:#1e293b;transition:border-color .15s;display:block}
+.wc-inp:focus{border-color:#16a34a;background:#fff}
+.wc-inp::placeholder{color:#d4c5b0}
+.wc-gender-row{display:flex;gap:8px;margin-top:10px}
+.wc-gender-btn{flex:1;padding:9px 0;border:1.5px solid #e2d5c3;background:#f9f5f0;border-radius:9px;font-size:13px;cursor:pointer;font-family:inherit;color:#78563a;transition:all .15s;font-weight:500}
+.wc-gender-btn:hover,.wc-gender-btn.sel{border-color:#16a34a;background:#f0fdf4;color:#14532d}
+.wc-yr-inp{background:#f9f5f0;border:1.5px solid #e2d5c3;border-radius:10px;padding:10px 14px;font-size:14px;width:100%;outline:none;font-family:'DM Sans',sans-serif;color:#1e293b;transition:border-color .15s;margin-top:10px}
+.wc-yr-inp:focus{border-color:#16a34a;background:#fff}
+.wc-next{width:100%;background:linear-gradient(135deg,#16a34a,#15803d);border:none;border-radius:10px;padding:13px;font-size:14px;font-weight:600;color:#fff;cursor:pointer;font-family:inherit;margin-top:16px;box-shadow:0 3px 14px rgba(22,163,74,.25);transition:all .2s}
+.wc-next:hover{background:linear-gradient(135deg,#22c55e,#16a34a)}
+.wc-next:disabled{background:#e2d5c3;box-shadow:none;cursor:not-allowed;color:#a8906c}
+.wc-skip-lnk{text-align:center;margin-top:10px;font-size:11px;color:#c4a882;cursor:pointer}
+.wc-skip-lnk:hover{color:#78563a}
+.wc-siblings-row{display:flex;flex-direction:column;gap:7px;margin-top:8px;max-height:180px;overflow-y:auto}
+.wc-sib-item{display:flex;gap:8px;align-items:center}
+.wc-sib-inp{flex:1;background:#f9f5f0;border:1.5px solid #e2d5c3;border-radius:8px;padding:9px 11px;font-size:13px;outline:none;font-family:'DM Sans',sans-serif;color:#1e293b}
+.wc-sib-inp:focus{border-color:#16a34a;background:#fff}
+.wc-add-sib{background:#f0fdf4;border:1.5px solid #bbf7d0;color:#16a34a;border-radius:8px;padding:7px 12px;font-size:12px;cursor:pointer;font-family:inherit;white-space:nowrap;font-weight:500}
+.wc-summary{background:#f9f5f0;border:1px solid #e8ddd0;border-radius:10px;padding:12px 14px;margin-top:12px}
+.wc-sum-row{display:flex;align-items:center;gap:9px;padding:5px 0;border-bottom:1px solid #f0e8dc}
+.wc-sum-row:last-child{border-bottom:none}
+.wc-sum-av{width:26px;height:26px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:9px;font-weight:700;color:#fff;flex-shrink:0}
+.wc-sum-nm{font-size:12.5px;font-weight:500;color:#1e293b}
+.wc-sum-rl{font-size:10.5px;color:#a8906c}
+
+/* ── ACTIVITY ── */
+#act{position:fixed;top:66px;left:50%;transform:translateX(-50%) translateY(-8px);background:#f0fdf4;border:1px solid #bbf7d0;border-radius:20px;padding:5px 15px;font-size:12px;color:#166534;font-weight:500;z-index:50;opacity:0;transition:all .25s;pointer-events:none;white-space:nowrap;box-shadow:0 2px 10px rgba(22,163,74,.15)}
+#act.on{opacity:1;transform:translateX(-50%) translateY(0)}
+
+/* ── PANEL — full overlay on mobile ── */
+#panel{position:fixed;z-index:40;background:#fff;border:1px solid #e2d5c3;overflow-y:auto;transition:transform .24s ease;box-shadow:-4px 0 24px rgba(0,0,0,.08)}
+#panel.open{transform:none!important}
+
+/* Desktop: right sidebar */
+@media(min-width:641px){
+  #panel{top:56px;right:0;bottom:0;width:320px;border-right:none;border-top:none;border-bottom:none;transform:translateX(100%);transition:transform .24s ease, top .25s ease}
+  #panel-drag{display:none}
+}
+/* Mobile: bottom sheet */
+@media(max-width:640px){
+  #panel{left:0;right:0;bottom:0;top:auto!important;height:82vh;border-bottom:none;border-left:none;border-right:none;border-radius:18px 18px 0 0;transform:translateY(100%)}
+  #panel-drag{display:flex;justify-content:center;padding:10px 0 4px;cursor:pointer}
+  #panel-drag-bar{width:36px;height:4px;background:rgba(255,255,255,.15);border-radius:2px}
+}
+#pnl-in{padding:16px 18px 32px}
+.pn-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:12px}
+.pn-title{font-family:'Playfair Display',serif;font-size:17px;color:#14532d;font-weight:500}
+.xb{background:#f5ede0;border:1px solid #e2d5c3;color:#a8906c;cursor:pointer;font-size:18px;line-height:1;padding:4px 8px;border-radius:7px;transition:all .1s}
+.xb:hover{background:#ede4d6;color:#78563a}
+
+/* ── PHOTO ── */
+.ph-wrap{position:relative;width:70px;height:70px;flex-shrink:0}
+.ph-img{width:70px;height:70px;border-radius:50%;object-fit:cover;display:block;border:2px solid rgba(34,197,94,.3)}
+.ph-empty{width:70px;height:70px;border-radius:50%;background:#f5ede0;border:2px dashed #c4a882;display:flex;flex-direction:column;align-items:center;justify-content:center;cursor:pointer;transition:background .15s}
+.ph-empty:hover{background:#ede4d6}
+.ph-empty span{font-size:18px}
+.ph-empty small{font-size:9px;color:#a8906c;text-align:center;margin-top:2px}
+.ph-edit-btn{position:absolute;bottom:-2px;right:-2px;width:22px;height:22px;border-radius:50%;background:#16a34a;color:#fff;border:2px solid #0a0f0a;font-size:10px;cursor:pointer;display:flex;align-items:center;justify-content:center}
+
+/* ── PROFILE ── */
+.prof-top{display:flex;gap:13px;margin-bottom:12px}
+.prof-info{flex:1;min-width:0}
+.prof-nm{font-family:'Playfair Display',serif;font-size:20px;color:#0f172a;line-height:1.15;word-break:break-word}
+.prof-yr{font-size:11px;color:#a8906c;margin-top:2px}
+.rel-tag{display:inline-block;margin-top:5px;padding:2px 9px;border-radius:20px;font-size:11px;font-weight:500;background:#f0fdf4;color:#166534;border:1px solid #bbf7d0}
+.status-pill{display:inline-flex;align-items:center;gap:4px;padding:2px 8px;border-radius:20px;font-size:10px;font-weight:500;margin-top:4px}
+.story-box{background:#fffbeb;border-left:3px solid #f59e0b;padding:9px 11px;border-radius:0 7px 7px 0;font-size:12.5px;color:#78350f;font-style:italic;line-height:1.55;margin:10px 0}
+
+/* ── COMPLETION ── */
+.comp-wrap{margin:10px 0}
+.comp-top{display:flex;justify-content:space-between;font-size:10px;color:#a8906c;margin-bottom:5px}
+.comp-track{background:#e8ddd0;border-radius:20px;height:5px;overflow:hidden}
+.comp-fill{height:5px;border-radius:20px;transition:width .5s ease;background:linear-gradient(90deg,#16a34a,#22c55e)}
+.comp-prompt{background:#fffbeb;border:1px solid #fde68a;border-radius:8px;padding:9px 11px;font-size:12px;color:#92400e;margin:10px 0;line-height:1.45}
+
+/* ── CONNECTIONS ── */
+.conn-hd{font-size:9.5px;color:#c4a882;text-transform:uppercase;letter-spacing:.09em;margin:12px 0 6px;font-weight:600}
+.ci{display:flex;align-items:center;gap:9px;padding:8px 9px;background:#f9f5f0;border-radius:8px;margin-bottom:5px;border:1px solid #e8ddd0;cursor:pointer;transition:all .1s}
+.ci:hover{background:#f0e8dc;border-color:#c4a882}
+.ci-av{width:30px;height:30px;border-radius:50%;object-fit:cover;flex-shrink:0}
+.ci-av-txt{width:30px;height:30px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:700;flex-shrink:0}
+.ci-nm{font-size:12.5px;font-weight:500;color:#1e293b}
+.ci-rl{font-size:10px;color:#a8906c}
+
+/* ── CONTEXTUAL ACTIONS ── */
+.ctx-sec{margin:14px 0;background:#f9f5f0;border:1px solid #e8ddd0;border-radius:10px;padding:12px}
+.ctx-hd{font-size:9.5px;color:#c4a882;text-transform:uppercase;letter-spacing:.09em;margin-bottom:9px;font-weight:600}
+.ctx-btns{display:flex;flex-wrap:wrap;gap:6px}
+.ctx-btn{border:1.5px solid;background:transparent;border-radius:20px;padding:6px 13px;font-size:11.5px;font-weight:500;cursor:pointer;font-family:inherit;transition:all .15s}
+.ctx-btn:hover{opacity:.8;transform:translateY(-1px)}
+
+/* ── FORMS ── */
+.fld{margin-bottom:9px}
+.fld label{font-size:10px;color:#a8906c;text-transform:uppercase;letter-spacing:.08em;display:block;margin-bottom:4px;font-weight:500}
+input,select,textarea{background:#faf7f3;border:1px solid #ddd0bc;border-radius:8px;color:#1e293b;padding:9px 11px;font-size:13px;width:100%;outline:none;font-family:inherit;display:block;transition:border-color .15s}
+input:focus,select:focus,textarea:focus{border-color:#16a34a;background:#fff}
+input::placeholder,textarea::placeholder{color:#d4c5b0}
+select option{background:#fff;color:#1e293b}
+textarea{resize:none;height:72px;line-height:1.5}
+.fld-row{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.sbtn{background:linear-gradient(135deg,#16a34a,#15803d);border:none;border-radius:8px;padding:11px 0;font-size:13px;font-weight:600;color:#fff;cursor:pointer;width:100%;font-family:inherit;margin-top:8px;box-shadow:0 2px 12px rgba(22,163,74,.25);transition:all .15s}
+.sbtn:hover{background:linear-gradient(135deg,#22c55e,#16a34a);box-shadow:0 3px 16px rgba(22,163,74,.35)}
+.sbtn.ghost{background:#fff;border:1px solid #ddd0bc;box-shadow:0 1px 3px rgba(0,0,0,.05);color:#78563a;margin-top:5px}
+.sbtn.ghost:hover{background:#f5ede0}
+.sbtn.danger{background:#fff1f2;border:1px solid #fecdd3;box-shadow:none;color:#dc2626;margin-top:5px}
+.sbtn.danger:hover{background:#fee2e2}
+.rel-prev{background:#f0fdf4;border:1px solid #bbf7d0;border-radius:8px;padding:8px 11px;font-size:12px;color:#166534;margin-bottom:8px}
+.sep{border:none;border-top:1px solid #f0e8dc;margin:14px 0}
+.edit-lnk{font-size:11px;color:#c4a882;cursor:pointer;text-decoration:underline;background:none;border:none;font-family:inherit;margin-top:4px;display:inline-block;transition:color .1s}
+.edit-lnk:hover{color:#78563a}
+.form-ph-wrap{display:flex;justify-content:center;margin-bottom:14px}
+.back-btn{background:none;border:none;color:#c4a882;cursor:pointer;font-family:inherit;font-size:12px;display:flex;align-items:center;gap:4px;padding:0;margin-bottom:10px;transition:color .1s}
+.back-btn:hover{color:#166534}
+.ar-ctx{background:#f0fdf4;border:1px solid #bbf7d0;border-radius:8px;padding:8px 11px;font-size:12px;color:#166534;margin-bottom:14px}
+
+/* ── LEGEND ── */
+#layout-toggle{position:fixed;bottom:14px;right:14px;display:flex;background:rgba(255,252,247,.95);border:1px solid #e2d5c3;border-radius:9px;overflow:hidden;box-shadow:0 2px 10px rgba(0,0,0,.08);z-index:10}
+.lt-btn{border:none;background:transparent;color:#a8906c;padding:7px 13px;font-size:11px;cursor:pointer;font-family:inherit;font-weight:500;transition:all .15s;display:flex;align-items:center;gap:5px}
+.lt-btn:hover{color:#78563a;background:#f5ede0}
+.lt-btn.active{background:#16a34a;color:#fff}
+#legend{position:fixed;bottom:14px;left:14px;background:rgba(255,252,247,.95);border:1px solid #e2d5c3;border-radius:10px;padding:10px 13px;font-size:10px;color:#a8906c;min-width:148px;z-index:10;display:none;box-shadow:0 2px 12px rgba(0,0,0,.08)}
+@media(min-width:641px){#legend{display:block}}
+.lg-t{font-size:9.5px;text-transform:uppercase;letter-spacing:.08em;color:#c4a882;margin-bottom:7px;font-weight:600}
+.lg-r{display:flex;align-items:center;gap:6px;margin-bottom:4px}
+.lg-d{width:9px;height:9px;border-radius:50%;flex-shrink:0}
+
+/* ── MAGIC MOMENT ── */
+@keyframes nodeEnter{0%{transform:scale(0) rotate(-10deg);opacity:0}60%{transform:scale(1.18) rotate(2deg)}100%{transform:scale(1) rotate(0deg);opacity:1}}
+@keyframes ripple{0%{r:24;opacity:.6}100%{r:55;opacity:0}}
+.nd-new{animation:nodeEnter .45s cubic-bezier(.34,1.56,.64,1) both}
+.magic-toast{position:fixed;top:70px;left:50%;transform:translateX(-50%) translateY(-12px);background:#fff;border:1px solid #e2d5c3;border-radius:14px;padding:12px 18px;font-size:13px;z-index:100;opacity:0;transition:all .3s;pointer-events:none;box-shadow:0 8px 28px rgba(0,0,0,.12);min-width:260px;max-width:340px;text-align:center}
+.magic-toast.show{transform:translateX(-50%) translateY(0);opacity:1}
+.magic-toast-name{font-family:'Playfair Display',serif;font-size:16px;color:#14532d;font-weight:500;margin-bottom:2px}
+.magic-toast-sub{font-size:11.5px;color:#a8906c}
+.magic-toast-actions{display:flex;gap:7px;margin-top:10px;justify-content:center}
+.mta-btn{border:1.5px solid;background:transparent;border-radius:20px;padding:5px 13px;font-size:11.5px;font-weight:500;cursor:pointer;font-family:inherit;transition:all .15s;pointer-events:auto}
+.magic-toast.show{pointer-events:auto}
+/* ── TOAST ── */
+#toast{position:fixed;bottom:20px;left:50%;transform:translateX(-50%) translateY(20px);padding:9px 18px;border-radius:9px;font-size:12.5px;z-index:300;opacity:0;transition:all .2s;pointer-events:none;white-space:nowrap;font-weight:500}
+#toast.show{transform:translateX(-50%) translateY(0);opacity:1}
+#toast.ok{background:#f0fdf4;border:1px solid #86efac;color:#14532d}
+#toast.err{background:#fff1f2;border:1px solid #fca5a5;color:#7f1d1d}
+#toast.info{background:#eff6ff;border:1px solid #bfdbfe;color:#1e3a8a}
+
+/* ── SHARE MODAL ── */
+#share-modal{display:none;position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:110;align-items:center;justify-content:center;padding:16px;backdrop-filter:blur(6px)}
+#share-modal.open{display:flex}
+#share-card{background:#fff;border:1px solid #e2d5c3;border-radius:16px;padding:24px;max-width:420px;width:100%;box-shadow:0 20px 50px rgba(0,0,0,.14)}
+.sh-title{font-family:'Playfair Display',serif;font-size:20px;color:#14532d;margin-bottom:4px}
+.sh-sub{font-size:12.5px;color:#78563a;margin-bottom:18px;line-height:1.5}
+.sh-step{display:flex;gap:10px;margin-bottom:10px;padding:10px 12px;background:#f9f5f0;border-radius:8px;border:1px solid #e8ddd0;align-items:flex-start}
+.sh-n{width:22px;height:22px;border-radius:50%;background:#16a34a;color:#fff;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;flex-shrink:0;margin-top:1px}
+.sh-bd strong{display:block;font-size:12.5px;color:#1e293b;margin-bottom:2px}
+.sh-bd span{font-size:11.5px;color:#78563a;line-height:1.45}
+.sh-link-box{background:#f0fdf4;border:1.5px solid #86efac;border-radius:8px;padding:10px 12px;font-size:11.5px;color:#166534;font-family:monospace;word-break:break-all;margin:10px 0;cursor:pointer;transition:background .15s;position:relative}
+.sh-link-box:hover{background:#dcfce7}
+.sh-link-copied{position:absolute;top:4px;right:8px;font-size:10px;color:#16a34a;opacity:0;transition:opacity .2s;font-family:'DM Sans',sans-serif;font-weight:600}
+.sh-link-copied.show{opacity:1}
+.sh-qr{text-align:center;margin:12px 0}
+.sh-btns{display:flex;gap:8px;margin-top:16px}
+.sh-btn{flex:1;border:1px solid #ddd0bc;background:#fff;color:#78563a;border-radius:8px;padding:9px 0;font-size:12.5px;cursor:pointer;font-family:inherit;transition:all .15s;font-weight:500;text-align:center}
+.sh-btn:hover{background:#f5ede0}
+.sh-btn.pri{background:linear-gradient(135deg,#16a34a,#15803d);border-color:#16a34a;color:#fff;font-weight:600}
+.sh-btn.pri:hover{background:linear-gradient(135deg,#22c55e,#16a34a)}
+.sh-btn.wa{background:#25D366;border-color:#25D366;color:#fff}
+.sh-btn.wa:hover{background:#128C7E}
+/* ── CONFIRM MODAL ── */
+#confirm-modal{display:none;position:fixed;inset:0;background:rgba(0,0,0,.35);z-index:300;align-items:center;justify-content:center;padding:16px;backdrop-filter:blur(4px)}
+#confirm-modal.open{display:flex}
+#confirm-card{background:#fff;border:1px solid #e2d5c3;border-radius:14px;padding:22px 22px 18px;max-width:360px;width:100%;box-shadow:0 16px 40px rgba(0,0,0,.14)}
+.cm-title{font-size:14px;font-weight:600;color:#1e293b;margin-bottom:6px}
+.cm-body{font-size:13px;color:#78563a;line-height:1.55;margin-bottom:18px}
+.cm-btns{display:flex;gap:8px;justify-content:flex-end}
+.cm-btn{border:1px solid #ddd0bc;background:#fff;color:#78563a;border-radius:8px;padding:8px 18px;font-size:13px;cursor:pointer;font-family:inherit;transition:all .15s;font-weight:500}
+.cm-btn:hover{background:#f5ede0}
+.cm-btn.pri{background:#16a34a;border-color:#16a34a;color:#fff}
+.cm-btn.pri:hover{background:#22c55e}
+.cm-btn.danger{background:#fee2e2;border-color:#fca5a5;color:#dc2626}
+.cm-btn.danger:hover{background:#fecaca}
+/* ── FIREBASE MODAL ── */
+#fb-modal{display:none;position:fixed;inset:0;background:rgba(0,0,0,.75);z-index:110;align-items:center;justify-content:center;backdrop-filter:blur(6px);padding:16px}
+#fb-modal.open{display:flex}
+#fb-card{background:#fff;border:1px solid #e2d5c3;border-radius:16px;padding:24px;max-width:500px;width:100%;box-shadow:0 16px 40px rgba(0,0,0,.15);max-height:90vh;overflow-y:auto}
+.fb-title{font-family:'Playfair Display',serif;font-size:20px;color:#14532d;margin-bottom:5px}
+.fb-sub{font-size:12.5px;color:#78563a;margin-bottom:16px;line-height:1.55}
+.fb-step{display:flex;gap:10px;margin-bottom:10px;padding:10px 12px;background:#f9f5f0;border-radius:8px;border:1px solid #e8ddd0}
+.fb-n{width:22px;height:22px;border-radius:50%;background:#16a34a;color:#fff;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;flex-shrink:0;margin-top:1px}
+.fb-bd strong{display:block;font-size:12.5px;color:#1e293b;margin-bottom:2px}
+.fb-bd span{font-size:11.5px;color:#78563a;line-height:1.45}
+.fb-bd a{color:#16a34a;text-decoration:none}
+.fb-bd a:hover{text-decoration:underline}
+.fb-bd code{background:#f0e8dc;padding:1px 5px;border-radius:4px;font-family:monospace;font-size:11px;color:#3d2b1a}
+.fb-cfg{background:#f5f0e8;border-radius:8px;padding:11px 13px;font-family:monospace;font-size:10.5px;color:#a8906c;margin:7px 0;line-height:1.7}
+.fb-textarea{width:100%;background:#faf7f3;border:1px solid #ddd0bc;border-radius:8px;padding:12px;font-family:monospace;font-size:11.5px;color:#1e293b;outline:none;resize:none;height:180px;line-height:1.7;margin-top:6px;transition:border-color .15s}
+.fb-textarea:focus{border-color:#16a34a}
+.fb-btns{display:flex;gap:8px;margin-top:16px;justify-content:flex-end}
+.fb-btn{border:1px solid #ddd0bc;background:#fff;color:#78563a;border-radius:7px;padding:8px 16px;font-size:12.5px;cursor:pointer;font-family:inherit;transition:all .15s}
+.fb-btn:hover{background:#f5ede0}
+.fb-btn.pri{background:linear-gradient(135deg,#16a34a,#15803d);border-color:#16a34a;color:#fff;font-weight:600;box-shadow:0 2px 10px rgba(22,163,74,.25)}
+.fb-btn.pri:hover{background:linear-gradient(135deg,#22c55e,#16a34a)}
+</style>
+</head>
+<body>
+<div id="bg">
+<svg viewBox="0 0 1440 900" preserveAspectRatio="xMidYMid slice" xmlns="http://www.w3.org/2000/svg">
+<defs>
+  <radialGradient id="fade" cx="50%" cy="45%" r="55%">
+    <stop offset="0%" stop-color="#f7f3ee" stop-opacity="0"/>
+    <stop offset="70%" stop-color="#f7f3ee" stop-opacity="0"/>
+    <stop offset="100%" stop-color="#f7f3ee" stop-opacity="1"/>
+  </radialGradient>
+</defs>
+<!-- Connection lines — very subtle -->
+<g stroke="#b8a898" stroke-width="1" fill="none" opacity="0.22">
+  <!-- Gen -2 couple -->
+  <line x1="420" y1="118" x2="540" y2="118" stroke-dasharray="4,6"/>
+  <!-- Gen -2 to gen -1 -->
+  <line x1="480" y1="118" x2="480" y2="198"/>
+  <line x1="480" y1="198" x2="380" y2="198"/>
+  <line x1="480" y1="198" x2="580" y2="198"/>
+  <!-- Gen -1 left couple -->
+  <line x1="280" y1="280" x2="380" y2="280" stroke-dasharray="4,6"/>
+  <!-- Gen -1 right couple -->
+  <line x1="580" y1="280" x2="700" y2="280" stroke-dasharray="4,6"/>
+  <!-- Gen -1 to gen 0 -->
+  <line x1="330" y1="280" x2="330" y2="370"/>
+  <line x1="330" y1="370" x2="260" y2="370"/>
+  <line x1="330" y1="370" x2="420" y2="370"/>
+  <line x1="640" y1="280" x2="640" y2="370"/>
+  <line x1="640" y1="370" x2="560" y2="370"/>
+  <line x1="640" y1="370" x2="740" y2="370"/>
+  <!-- Gen 0 to gen 1 -->
+  <line x1="420" y1="370" x2="420" y2="460"/>
+  <line x1="420" y1="460" x2="340" y2="460"/>
+  <line x1="420" y1="460" x2="510" y2="460"/>
+  <!-- Gen 1 -->
+  <line x1="740" y1="370" x2="740" y2="460"/>
+  <line x1="740" y1="460" x2="660" y2="460"/>
+  <line x1="740" y1="460" x2="820" y2="460"/>
+  <!-- Right branch scattered -->
+  <line x1="1050" y1="200" x2="1150" y2="200" stroke-dasharray="4,6"/>
+  <line x1="1100" y1="200" x2="1100" y2="290"/>
+  <line x1="1100" y1="290" x2="1020" y2="290"/>
+  <line x1="1100" y1="290" x2="1180" y2="290"/>
+  <line x1="1020" y1="290" x2="1020" y2="380"/>
+  <!-- Far left scattered -->
+  <line x1="120" y1="320" x2="200" y2="320" stroke-dasharray="4,6"/>
+  <line x1="160" y1="320" x2="160" y2="420"/>
+  <line x1="160" y1="420" x2="100" y2="420"/>
+  <!-- Bottom right -->
+  <line x1="900" y1="500" x2="1000" y2="500" stroke-dasharray="4,6"/>
+  <line x1="950" y1="500" x2="950" y2="590"/>
+  <line x1="950" y1="590" x2="880" y2="590"/>
+  <line x1="950" y1="590" x2="1030" y2="590"/>
+</g>
+<!-- Ghost nodes — person silhouette circles -->
+<g opacity="0.13">
+  <!-- Helper: circle + person icon macro -->
+  <!-- Gen -2 -->
+  <circle cx="420" cy="118" r="28" fill="#9db8d4" stroke="#7a9bbf" stroke-width="1.2"/>
+  <circle cx="420" cy="108" r="9" fill="#f7f3ee"/>
+  <path d="M402 134 Q402 122 420 122 Q438 122 438 134" fill="#f7f3ee"/>
+
+  <circle cx="540" cy="118" r="28" fill="#d4a0b8" stroke="#bf7a9b" stroke-width="1.2"/>
+  <circle cx="540" cy="108" r="9" fill="#f7f3ee"/>
+  <path d="M522 134 Q522 122 540 122 Q558 122 558 134" fill="#f7f3ee"/>
+
+  <!-- Gen -1 left -->
+  <circle cx="280" cy="280" r="28" fill="#9db8d4" stroke="#7a9bbf" stroke-width="1.2"/>
+  <circle cx="280" cy="270" r="9" fill="#f7f3ee"/>
+  <path d="M262 296 Q262 284 280 284 Q298 284 298 296" fill="#f7f3ee"/>
+
+  <circle cx="380" cy="280" r="28" fill="#d4a0b8" stroke="#bf7a9b" stroke-width="1.2"/>
+  <circle cx="380" cy="270" r="9" fill="#f7f3ee"/>
+  <path d="M362 296 Q362 284 380 284 Q398 284 398 296" fill="#f7f3ee"/>
+
+  <!-- Gen -1 right -->
+  <circle cx="580" cy="280" r="28" fill="#d4a0b8" stroke="#bf7a9b" stroke-width="1.2"/>
+  <circle cx="580" cy="270" r="9" fill="#f7f3ee"/>
+  <path d="M562 296 Q562 284 580 284 Q598 284 598 296" fill="#f7f3ee"/>
+
+  <circle cx="700" cy="280" r="28" fill="#9db8d4" stroke="#7a9bbf" stroke-width="1.2"/>
+  <circle cx="700" cy="270" r="9" fill="#f7f3ee"/>
+  <path d="M682 296 Q682 284 700 284 Q718 284 718 296" fill="#f7f3ee"/>
+
+  <!-- Gen 0 -->
+  <circle cx="260" cy="370" r="28" fill="#9db8d4" stroke="#7a9bbf" stroke-width="1.2"/>
+  <circle cx="260" cy="360" r="9" fill="#f7f3ee"/>
+  <path d="M242 386 Q242 374 260 374 Q278 374 278 386" fill="#f7f3ee"/>
+
+  <circle cx="420" cy="370" r="32" fill="#b8a070" stroke="#9a8455" stroke-width="2"/>
+  <circle cx="420" cy="359" r="10" fill="#f7f3ee"/>
+  <path d="M400 387 Q400 373 420 373 Q440 373 440 387" fill="#f7f3ee"/>
+
+  <circle cx="560" cy="370" r="28" fill="#d4a0b8" stroke="#bf7a9b" stroke-width="1.2"/>
+  <circle cx="560" cy="360" r="9" fill="#f7f3ee"/>
+  <path d="M542 386 Q542 374 560 374 Q578 374 578 386" fill="#f7f3ee"/>
+
+  <circle cx="740" cy="370" r="28" fill="#9db8d4" stroke="#7a9bbf" stroke-width="1.2"/>
+  <circle cx="740" cy="360" r="9" fill="#f7f3ee"/>
+  <path d="M722 386 Q722 374 740 374 Q758 374 758 386" fill="#f7f3ee"/>
+
+  <!-- Gen 1 -->
+  <circle cx="340" cy="460" r="24" fill="#9db8d4" stroke="#7a9bbf" stroke-width="1"/>
+  <circle cx="340" cy="451" r="8" fill="#f7f3ee"/>
+  <path d="M324 474 Q324 463 340 463 Q356 463 356 474" fill="#f7f3ee"/>
+
+  <circle cx="510" cy="460" r="24" fill="#d4a0b8" stroke="#bf7a9b" stroke-width="1"/>
+  <circle cx="510" cy="451" r="8" fill="#f7f3ee"/>
+  <path d="M494 474 Q494 463 510 463 Q526 463 526 474" fill="#f7f3ee"/>
+
+  <circle cx="660" cy="460" r="24" fill="#d4a0b8" stroke="#bf7a9b" stroke-width="1"/>
+  <circle cx="660" cy="451" r="8" fill="#f7f3ee"/>
+  <path d="M644 474 Q644 463 660 463 Q676 463 676 474" fill="#f7f3ee"/>
+
+  <circle cx="820" cy="460" r="24" fill="#9db8d4" stroke="#7a9bbf" stroke-width="1"/>
+  <circle cx="820" cy="451" r="8" fill="#f7f3ee"/>
+  <path d="M804 474 Q804 463 820 463 Q836 463 836 474" fill="#f7f3ee"/>
+
+  <!-- Right scattered branch -->
+  <circle cx="1050" cy="200" r="24" fill="#d4a0b8" stroke="#bf7a9b" stroke-width="1"/>
+  <circle cx="1050" cy="191" r="8" fill="#f7f3ee"/>
+  <path d="M1034 214 Q1034 203 1050 203 Q1066 203 1066 214" fill="#f7f3ee"/>
+
+  <circle cx="1150" cy="200" r="24" fill="#9db8d4" stroke="#7a9bbf" stroke-width="1"/>
+  <circle cx="1150" cy="191" r="8" fill="#f7f3ee"/>
+  <path d="M1134 214 Q1134 203 1150 203 Q1166 203 1166 214" fill="#f7f3ee"/>
+
+  <circle cx="1020" cy="290" r="22" fill="#b8a8d4" stroke="#9a87bf" stroke-width="1"/>
+  <circle cx="1020" cy="282" r="7" fill="#f7f3ee"/>
+  <path d="M1006 302 Q1006 293 1020 293 Q1034 293 1034 302" fill="#f7f3ee"/>
+
+  <circle cx="1180" cy="290" r="22" fill="#9db8d4" stroke="#7a9bbf" stroke-width="1"/>
+  <circle cx="1180" cy="282" r="7" fill="#f7f3ee"/>
+  <path d="M1166 302 Q1166 293 1180 293 Q1194 293 1194 302" fill="#f7f3ee"/>
+
+  <circle cx="1020" cy="380" r="20" fill="#d4a0b8" stroke="#bf7a9b" stroke-width="1"/>
+  <circle cx="1020" cy="372" r="7" fill="#f7f3ee"/>
+  <path d="M1007 391 Q1007 383 1020 383 Q1033 383 1033 391" fill="#f7f3ee"/>
+
+  <!-- Far left scattered -->
+  <circle cx="120" cy="320" r="22" fill="#9db8d4" stroke="#7a9bbf" stroke-width="1"/>
+  <circle cx="120" cy="312" r="7" fill="#f7f3ee"/>
+  <path d="M106 332 Q106 323 120 323 Q134 323 134 332" fill="#f7f3ee"/>
+
+  <circle cx="200" cy="320" r="22" fill="#d4a0b8" stroke="#bf7a9b" stroke-width="1"/>
+  <circle cx="200" cy="312" r="7" fill="#f7f3ee"/>
+  <path d="M186 332 Q186 323 200 323 Q214 323 214 332" fill="#f7f3ee"/>
+
+  <circle cx="100" cy="420" r="20" fill="#b8a8d4" stroke="#9a87bf" stroke-width="1"/>
+  <circle cx="100" cy="412" r="7" fill="#f7f3ee"/>
+  <path d="M87 431 Q87 423 100 423 Q113 423 113 431" fill="#f7f3ee"/>
+
+  <!-- Bottom right -->
+  <circle cx="900" cy="500" r="22" fill="#9db8d4" stroke="#7a9bbf" stroke-width="1"/>
+  <circle cx="900" cy="492" r="7" fill="#f7f3ee"/>
+  <path d="M886 512 Q886 503 900 503 Q914 503 914 512" fill="#f7f3ee"/>
+
+  <circle cx="1000" cy="500" r="22" fill="#d4a0b8" stroke="#bf7a9b" stroke-width="1"/>
+  <circle cx="1000" cy="492" r="7" fill="#f7f3ee"/>
+  <path d="M986 512 Q986 503 1000 503 Q1014 503 1014 512" fill="#f7f3ee"/>
+
+  <circle cx="880" cy="590" r="20" fill="#d4a0b8" stroke="#bf7a9b" stroke-width="1"/>
+  <circle cx="880" cy="582" r="7" fill="#f7f3ee"/>
+  <path d="M867 601 Q867 593 880 593 Q893 593 893 601" fill="#f7f3ee"/>
+
+  <circle cx="1030" cy="590" r="20" fill="#9db8d4" stroke="#7a9bbf" stroke-width="1"/>
+  <circle cx="1030" cy="582" r="7" fill="#f7f3ee"/>
+  <path d="M1017 601 Q1017 593 1030 593 Q1043 593 1043 601" fill="#f7f3ee"/>
+
+  <!-- Extra scattered nodes for depth -->
+  <circle cx="1280" cy="350" r="18" fill="#b8a8d4" stroke="#9a87bf" stroke-width="1"/>
+  <circle cx="1350" cy="180" r="16" fill="#9db8d4" stroke="#7a9bbf" stroke-width="1"/>
+  <circle cx="1300" cy="480" r="20" fill="#d4a0b8" stroke="#bf7a9b" stroke-width="1"/>
+  <circle cx="60" cy="180" r="18" fill="#9db8d4" stroke="#7a9bbf" stroke-width="1"/>
+  <circle cx="80" cy="560" r="16" fill="#d4a0b8" stroke="#bf7a9b" stroke-width="1"/>
+  <circle cx="1200" cy="600" r="18" fill="#b8a8d4" stroke="#9a87bf" stroke-width="1"/>
+  <circle cx="700" cy="580" r="18" fill="#9db8d4" stroke="#7a9bbf" stroke-width="1"/>
+</g>
+<!-- Vignette fade at edges to blend -->
+<rect width="1440" height="900" fill="url(#fade)"/>
+</svg>
+</div>
+
+<!-- ONBOARDING WIZARD -->
+<div id="welcome">
+ <div id="wc">
+  <div class="wc-header">
+   <div class="wc-leaf">🌿</div>
+   <div>
+    <div class="wc-brand">Raíces</div>
+    <div style="font-size:10px;color:#a8906c;margin-top:1px;letter-spacing:.01em">La red viva de tu familia</div>
+   </div>
+  </div>
+  <div class="wc-prog-wrap">
+   <div class="wc-prog-track"><div class="wc-prog-fill" id="wc-prog" style="width:14%"></div></div>
+   <div class="wc-prog-lbl"><span id="wc-step-lbl">Paso 1 de 6</span><span id="wc-step-name">Tu nombre</span></div>
+  </div>
+  <div class="wc-body" id="wc-body"></div>
+ </div>
+</div>
+
+<!-- HEADER -->
+<div id="hd">
+ <div id="logo">
+  <div id="logo-leaf">🌿</div>
+  <div>
+   <div id="logo-text">Raíces</div>
+   <div id="logo-st" style="font-size:9.5px;margin-top:1px">cargando…</div>
+      <div id="logo-creator" style="font-size:9px;color:#c4a882;margin-top:0;display:none">creado por <span id="creator-name" style="font-weight:500;color:#a8906c"></span></div>
+  </div>
+ </div>
+ <div id="hd-center">
+  <div class="hst"><div class="dot" style="background:#22c55e"></div>👥 <strong id="st-p">0</strong></div>
+  <div class="hst">📷 <strong id="st-f">0</strong></div>
+  <div class="hst">✍️ <strong id="st-h">0</strong></div>
+ </div>
+ <div id="hd-right">
+  <div id="sync-pill" onclick="openFbModal()" title="Conectar con la familia en tiempo real">
+   <span id="sync-dot"></span>
+   <span id="sync-lbl">Sin conectar</span>
+  </div>
+  <div style="width:1px;height:20px;background:#e8ddd0;margin:0 3px;flex-shrink:0"></div>
+  <button class="hb" onclick="openPDF()" title="Descargar árbol familiar en PDF">
+   <svg width="12" height="12" viewBox="0 0 16 16" fill="none" style="vertical-align:middle;margin-right:4px"><path d="M8 1v8M5 6l3 3 3-3" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/><path d="M2 11v2a1 1 0 001 1h10a1 1 0 001-1v-2" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>PDF
+  </button>
+  <input type="file" id="imp" accept=".json" style="display:none" onchange="importData(event)">
+  <div style="width:1px;height:20px;background:#e8ddd0;margin:0 3px;flex-shrink:0"></div>
+  <button class="hb" onclick="openShare()" title="Invitar a la familia" style="display:inline-flex;align-items:center;gap:5px;background:linear-gradient(135deg,#f0fdf4,#dcfce7);border-color:#86efac;color:#15803d;font-weight:600">
+   <svg width="12" height="12" viewBox="0 0 16 16" fill="none"><circle cx="13" cy="3" r="2" stroke="currentColor" stroke-width="1.4"/><circle cx="3" cy="8" r="2" stroke="currentColor" stroke-width="1.4"/><circle cx="13" cy="13" r="2" stroke="currentColor" stroke-width="1.4"/><path d="M5 7l6-3M5 9l6 3" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/></svg>Invitar
+  </button>
+  <button class="hb" onclick="showWelcome()" title="Cómo usar Raíces" style="display:inline-flex;align-items:center;gap:5px">
+   <svg width="13" height="13" viewBox="0 0 16 16" fill="none"><circle cx="8" cy="8" r="6.5" stroke="currentColor" stroke-width="1.4"/><path d="M8 11v-.5M8 8.5c0-1 .75-1.5 1.5-2A2 2 0 106 7" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/></svg>Guía
+  </button>
+  <div style="width:1px;height:20px;background:#e8ddd0;margin:0 3px;flex-shrink:0"></div>
+  <button class="hb amber" id="btn-rel" onclick="openPanel('rel')">+ Vínculo</button>
+  <button class="hb pri" onclick="openPanel('person')">+ Persona</button>
+ </div>
+</div>
+
+<div id="body">
+ <svg id="cvs" class="grab"></svg>
+ <div id="panel">
+  <div id="panel-drag" onclick="closePanel()"><div id="panel-drag-bar"></div></div>
+  <div id="pnl-in"></div>
+ </div>
+  <!-- LAYOUT TOGGLE -->
+  <div id="layout-toggle">
+    <button class="lt-btn active" id="lt-force" onclick="setLayout('force')" title="Vista de red">
+      <svg width="11" height="11" viewBox="0 0 12 12" fill="none"><circle cx="6" cy="6" r="2" fill="currentColor"/><circle cx="2" cy="2" r="1.5" fill="currentColor"/><circle cx="10" cy="2" r="1.5" fill="currentColor"/><circle cx="2" cy="10" r="1.5" fill="currentColor"/><line x1="4" y1="4" x2="2" y2="2" stroke="currentColor" stroke-width="1"/><line x1="8" y1="4" x2="10" y2="2" stroke="currentColor" stroke-width="1"/><line x1="4" y1="8" x2="2" y2="10" stroke="currentColor" stroke-width="1"/></svg>Red
+    </button>
+    <button class="lt-btn" id="lt-tree" onclick="setLayout('tree')" title="Vista de árbol estable">
+      <svg width="11" height="11" viewBox="0 0 12 12" fill="none"><circle cx="6" cy="1.5" r="1.5" fill="currentColor"/><circle cx="3" cy="6" r="1.5" fill="currentColor"/><circle cx="9" cy="6" r="1.5" fill="currentColor"/><circle cx="1.5" cy="10.5" r="1.5" fill="currentColor"/><circle cx="4.5" cy="10.5" r="1.5" fill="currentColor"/><circle cx="7.5" cy="10.5" r="1.5" fill="currentColor"/><line x1="6" y1="3" x2="3" y2="4.5" stroke="currentColor" stroke-width="1"/><line x1="6" y1="3" x2="9" y2="4.5" stroke="currentColor" stroke-width="1"/><line x1="3" y1="7.5" x2="1.5" y2="9" stroke="currentColor" stroke-width="1"/><line x1="3" y1="7.5" x2="4.5" y2="9" stroke="currentColor" stroke-width="1"/></svg>Árbol
+    </button>
+  </div>
+
+ <div id="legend">
+  <div class="lg-t">Color = género</div>
+  <div class="lg-r"><div class="lg-d" style="background:#3b82f6;border:2px solid #60a5fa"></div><span>Hombre</span></div>
+  <div class="lg-r"><div class="lg-d" style="background:#ec4899;border:2px solid #f472b6"></div><span>Mujer</span></div>
+  <div class="lg-r"><div class="lg-d" style="background:#a78bfa;border:2px solid #c4b5fd"></div><span>Sin especificar</span></div>
+  <div class="lg-r"><div class="lg-d" style="background:#f59e0b;border:2px solid #fcd34d"></div><span>Eres tú</span></div>
+  <div class="lg-t" style="margin-top:8px">Anillo = perfil</div>
+  <div class="lg-r"><svg width="16" height="4"><line x1="0" y1="2" x2="16" y2="2" stroke="#64748b" stroke-width="1.5"/></svg><span>Padre/Madre</span></div>
+  <div class="lg-r"><svg width="16" height="4"><line x1="0" y1="2" x2="16" y2="2" stroke="#ec4899" stroke-width="1.2" stroke-dasharray="5,3"/></svg><span>Pareja</span></div>
+ </div>
+</div>
+
+<!-- HOY EN TU FAMILIA -->
+<div id="hoy-wrap">
+  <div id="hoy-inner" onclick="event.stopPropagation()">
+    <div id="hoy-header">
+      <div id="hoy-title">
+        <svg width="13" height="13" viewBox="0 0 16 16" fill="none"><path d="M8 1C4.13 1 1 4.13 1 8s3.13 7 7 7 7-3.13 7-7-3.13-7-7-7z" stroke="#78563a" stroke-width="1.3"/><path d="M8 4v4l3 2" stroke="#78563a" stroke-width="1.3" stroke-linecap="round"/></svg>
+        Hoy en tu familia
+      </div>
+      <div id="hoy-sub">cargando…</div>
+    </div>
+    <div id="hoy-cards"></div>
+    <button id="hoy-toggle" onclick="toggleHoy()" title="Ocultar">
+      <svg width="10" height="10" viewBox="0 0 10 6" fill="none"><path d="M1 5l4-4 4 4" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      Ocultar
+    </button>
+  </div>
+</div>
+<button id="hoy-show-btn" onclick="toggleHoy()">📅 Hoy en tu familia</button>
+
+<!-- ACTIVITY BANNER -->
+<div id="act"></div>
+<div id="toast"></div>
+<div id="magic-toast" class="magic-toast"><div class="magic-toast-name" id="mt-name"></div><div class="magic-toast-sub" id="mt-sub"></div><div class="magic-toast-actions" id="mt-actions"></div></div>
+
+<!-- SHARE MODAL -->
+<div id="share-modal" onclick="if(event.target===this)closeShare()">
+  <div id="share-card">
+    <div class="sh-title">🔗 Invitar a la familia</div>
+    <div class="sh-sub">Comparte este link para que tu familia pueda ver y editar el árbol juntos.</div>
+    <div id="sh-content"></div>
+    <div class="sh-btns">
+      <button class="sh-btn" onclick="closeShare()">Cerrar</button>
+      <button class="sh-btn wa" onclick="shareWhatsApp()" id="sh-wa">
+        <svg style="vertical-align:middle;margin-right:5px" width="14" height="14" viewBox="0 0 24 24" fill="white"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347z"/><path d="M12 0C5.373 0 0 5.373 0 12c0 2.136.563 4.14 1.547 5.874L.057 23.857a.5.5 0 00.609.61l6.057-1.488A11.945 11.945 0 0012 24c6.627 0 12-5.373 12-12S18.627 0 12 0zm0 22c-1.96 0-3.8-.538-5.373-1.472l-.386-.23-3.994.981.999-3.9-.253-.4A9.944 9.944 0 012 12C2 6.477 6.477 2 12 2s10 4.477 10 10-4.477 10-10 10z"/></svg>
+        WhatsApp
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- CONFIRM MODAL -->
+<div id="confirm-modal">
+  <div id="confirm-card">
+    <div class="cm-title" id="cm-title">¿Confirmar?</div>
+    <div class="cm-body" id="cm-body"></div>
+    <div class="cm-btns" id="cm-btns"></div>
+  </div>
+</div>
+
+<!-- FIREBASE MODAL -->
+<div id="fb-modal" onclick="if(event.target===this)closeFbModal()">
+ <div id="fb-card">
+  <div class="fb-title">🔥 Conectar con Firebase</div>
+  <div class="fb-sub">Activa el tiempo real para que toda la familia vea los cambios al instante. Gratis para siempre.</div>
+  <div class="fb-step"><div class="fb-n">1</div><div class="fb-bd"><strong>Crea un proyecto Firebase</strong><span>Ve a <a href="https://console.firebase.google.com" target="_blank">console.firebase.google.com</a> → "Añadir proyecto" → ponle nombre → desactiva Analytics → Crear</span></div></div>
+  <div class="fb-step"><div class="fb-n">2</div><div class="fb-bd"><strong>Activa Firestore Database</strong><span>Menú izquierdo → Build → Firestore Database → Crear base de datos → <strong>Modo de prueba</strong> → us-central1 → Listo</span></div></div>
+  <div class="fb-step"><div class="fb-n">3</div><div class="fb-bd"><strong>Registra la app web</strong><span>Descripción general → ícono <code>&lt;/&gt;</code> → ponle nombre → Registrar app → no cierres la página</span></div></div>
+  <div class="fb-step"><div class="fb-n">4</div><div class="fb-bd"><strong>Pega el objeto firebaseConfig aquí</strong>
+   <div class="fb-cfg">{ apiKey: "...", authDomain: "...", projectId: "...", ... }</div>
+   <textarea class="fb-textarea" id="fb-cfg-txt" placeholder="Pega aquí el objeto { ... } completo"></textarea>
+  </div></div>
+  <div style="border-top:1px solid #e8ddd0;margin-top:16px;padding-top:14px">
+   <div style="font-size:10px;color:#c4a882;text-transform:uppercase;letter-spacing:.08em;margin-bottom:10px">Otras opciones</div>
+   <button onclick="closeFbModal();openGEDCOMPicker()" style="width:100%;background:#f0fdf4;border:1px solid #bbf7d0;border-radius:8px;padding:9px;font-size:12.5px;color:#166534;cursor:pointer;font-family:inherit;margin-bottom:8px;font-weight:500">
+    📂 Importar archivo GEDCOM (Ancestry, FamilySearch, MyHeritage)
+   </button>
+   <div style="font-size:10px;color:#c4a882;margin-bottom:8px">Copia de seguridad manual</div>
+   <div style="display:flex;gap:8px">
+    <button class="fb-btn" onclick="exportData();closeFbModal()" style="flex:1;display:flex;align-items:center;justify-content:center;gap:5px;font-size:12px">
+     <svg width="12" height="12" viewBox="0 0 16 16" fill="none"><path d="M8 1v8M5 6l3 3 3-3" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/><path d="M2 11v2a1 1 0 001 1h10a1 1 0 001-1v-2" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>
+     Descargar backup
+    </button>
+    <button class="fb-btn" onclick="document.getElementById('imp').click();closeFbModal()" style="flex:1;display:flex;align-items:center;justify-content:center;gap:5px;font-size:12px">
+     <svg width="12" height="12" viewBox="0 0 16 16" fill="none"><path d="M8 11V3M5 6l3-3 3 3" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/><path d="M2 11v2a1 1 0 001 1h10a1 1 0 001-1v-2" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>
+     Cargar backup
+    </button>
+   </div>
+  </div>
+  <div class="fb-btns">
+   <button class="fb-btn" onclick="closeFbModal()">Cancelar</button>
+   <button class="fb-btn pri" onclick="connectFirebase()">Conectar y activar tiempo real →</button>
+  </div>
+ </div>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/d3/7.8.5/d3.min.js"></script>
+<script>
+const RN=23,CIRC=2*Math.PI*RN;
+const CF=[{k:'photo',w:25,lbl:'Foto'},{k:'birthDate',w:20,lbl:'Fecha de nacimiento'},{k:'story',w:20,lbl:'Historia'},{k:'firstName',w:15,lbl:'Nombre'},{k:'location',w:10,lbl:'Lugar de origen'},{k:'lastName',w:10,lbl:'Apellido'}];
+const GL={'-3':'Bisabuelos','-2':'Abuelos','-1':'Padres · Tíos/as','0':'Tu generación','1':'Hijos/as','2':'Nietos/as','3':'Bisnietos/as'};
+
+function nStyle(p){
+  if(p.status==='conflict')return{fill:'#fff1f2',border:'#ef4444',ring:'#ef4444',text:'#dc2626'};
+  if(p.id===viewerId)return{fill:'#fffbeb',border:'#f59e0b',ring:'#f59e0b',text:'#92400e'};
+  const m={male:{fill:'#eff6ff',border:'#3b82f6',ring:'#3b82f6',text:'#1d4ed8'},female:{fill:'#fdf2f8',border:'#ec4899',ring:'#ec4899',text:'#9d174d'},unknown:{fill:'#f5f3ff',border:'#8b5cf6',ring:'#8b5cf6',text:'#6d28d9'}};
+  return m[p.gender]||m.unknown;}
+
+const SC={validated:{c:'#22c55e',lbl:'Validado'},unverified:{c:'#475569',lbl:'Sin verificar'},conflict:{c:'#ef4444',lbl:'En conflicto'}};
+const RC={parent:{c:'#94a3b8',dash:null},partner:{c:'#ec4899',dash:'5,3'},adopted:{c:'#22c55e',dash:'7,4'}};
+const SK='raices_v5';
+const VK='raices_viewer'; // localStorage key for who is viewing
+
+const SEED_P=[
+  {id:'gp1',firstName:'Abuelo',lastName:'Paterno',gender:'male',birthDate:'',deathDate:'',location:'',story:'',photo:null,status:'unverified',notes:'Haz click para editar'},
+  {id:'gm1',firstName:'Abuela',lastName:'Paterna',gender:'female',birthDate:'',deathDate:'',location:'',story:'',photo:null,status:'unverified',notes:''},
+  {id:'gp2',firstName:'Abuelo',lastName:'Materno',gender:'male',birthDate:'',deathDate:'',location:'',story:'',photo:null,status:'unverified',notes:''},
+  {id:'gm2',firstName:'Abuela',lastName:'Materna',gender:'female',birthDate:'',deathDate:'',location:'',story:'',photo:null,status:'unverified',notes:''},
+  {id:'me',firstName:'Yo',lastName:'(tu apellido)',gender:'unknown',birthDate:'',deathDate:'',location:'',story:'',photo:null,status:'unverified',notes:'Este nodo eres tú'},
+];
+const SEED_R=[{id:'rg1',source:'gp1',target:'gm1',type:'partner'},{id:'rg2',source:'gp2',target:'gm2',type:'partner'}];
+let persons=[],relations=[],selectedId=null,d3Nodes=[],sim;
+let viewerId='me'; // The person currently viewing — changes per browser session
+const svgEl=document.getElementById('cvs');
+
+function save(){try{localStorage.setItem(SK,JSON.stringify({persons,relations}))}catch(e){}clearTimeout(window._fbT);window._fbT=setTimeout(()=>pushToFirebase(),900);}
+function load(){
+  // Try current key first
+  try{const d=JSON.parse(localStorage.getItem(SK)||'null');if(d?.persons&&d.persons.length>0){persons=d.persons;relations=d.relations;return}}catch(e){}
+  // Try old keys (migration from previous versions)
+  const oldKeys=['familynet_v4','familynet_v3','fn_v4','raices_v4'];
+  for(const k of oldKeys){try{const d=JSON.parse(localStorage.getItem(k)||'null');if(d?.persons&&d.persons.length>0){persons=d.persons;relations=d.relations;localStorage.setItem(SK,JSON.stringify({persons,relations}));console.log('Migrated from',k);return}}catch(e){}}persons=SEED_P.map(p=>({...p}));relations=SEED_R.map(r=>({...r}));try{localStorage.setItem(SK,JSON.stringify({persons,relations}))}catch(e){}}
+
+function uid(){return'x'+Date.now().toString(36)+Math.random().toString(36).slice(2,6)}
+function initials(p){return((p.firstName?.[0]||'')+(p.lastName?.[0]||'')).toUpperCase()||'?'}
+function fullName(p){return`${p.firstName||''} ${p.lastName||''}`.trim()||'Sin nombre'}
+function birthYear(p){return p.birthDate?p.birthDate.slice(0,4):null}
+function compl(p){return CF.reduce((s,f)=>s+(p[f.k]?f.w:0),0)}
+function missingTop(p){for(const f of CF)if(!p[f.k])return f.lbl;return null}
+function isDupe(a,b){return relations.some(r=>(r.source===a&&r.target===b)||(r.source===b&&r.target===a))}
+function wouldCycle(rels,from,to){const ch={};rels.filter(r=>r.type==='parent'||r.type==='adopted').forEach(r=>{(ch[r.source]=ch[r.source]||[]).push(r.target)});(ch[from]=ch[from]||[]).push(to);const v=new Set();function reach(n){if(n===from)return true;if(v.has(n))return false;v.add(n);return(ch[n]||[]).some(reach)}return reach(to);}
+function numGens(){const gm=computeGens();if(!gm.size)return 1;const v=[...gm.values()];return Math.max(...v)-Math.min(...v)+1;}
+
+function computeGens(){
+  const gm=new Map();const start=persons.find(p=>p.id==='me')?.id||persons[0]?.id;
+  if(!start)return gm;gm.set(start,0);const q=[{id:start,g:0}];const vis=new Set([start]);
+  while(q.length){const{id,g}=q.shift();for(const r of relations){let nid=null,ng=null;
+    if(r.type==='partner'){if(r.source===id&&!vis.has(r.target)){nid=r.target;ng=g}else if(r.target===id&&!vis.has(r.source)){nid=r.source;ng=g}}
+    else{if(r.source===id&&!vis.has(r.target)){nid=r.target;ng=g+1}else if(r.target===id&&!vis.has(r.source)){nid=r.source;ng=g-1}}
+    if(nid!==null){gm.set(nid,ng);vis.add(nid);q.push({id:nid,g:ng})}}}
+  persons.filter(p=>!gm.has(p.id)).forEach(p=>gm.set(p.id,0));return gm;}
+
+function findRel(fromId,toId){
+  if(fromId===toId)return'Eres tú';
+  const MAP={'up':'tu padre/madre','down':'tu hijo/a','partner':'tu pareja','up·up':'tu abuelo/a','up·down':'tu hermano/a','up·partner':'tu madrastra/padrastro','down·down':'tu nieto/a','partner·up':'tu suegro/a','partner·down':'tu hijastro/a','down·partner':'tu nuera/yerno','up·up·up':'tu bisabuelo/a','up·up·down':'tu tío/a','up·down·down':'tu sobrino/a','up·down·partner':'tu cuñado/a','partner·up·down':'tu cuñado/a','up·up·down·down':'tu primo/a (1°)','up·up·up·down':'tu tío/a abuelo/a','up·up·up·down·down':'tu primo/a (2°)'};
+  const q=[{id:fromId,steps:[]}];const vis=new Set([fromId]);
+  while(q.length){const{id,steps}=q.shift();if(steps.length>=7)continue;
+    for(const r of relations){let nid=null,step=null;
+      if(r.type==='partner'){if(r.source===id){nid=r.target;step='partner'}else if(r.target===id){nid=r.source;step='partner'}}
+      else{if(r.source===id){nid=r.target;step='down'}else if(r.target===id){nid=r.source;step='up'}}
+      if(nid&&!vis.has(nid)){vis.add(nid);const ns=[...steps,step];if(nid===toId){const k=ns.join('·');return MAP[k]||'pariente'}q.push({id:nid,steps:ns})}}}
+  return null;}
+
+function getParents(pid){return relations.filter(r=>(r.type==='parent'||r.type==='adopted')&&r.target===pid).map(r=>persons.find(x=>x.id===r.source)).filter(Boolean);}
+function getChildren(pid){return relations.filter(r=>(r.type==='parent'||r.type==='adopted')&&r.source===pid).map(r=>persons.find(x=>x.id===r.target)).filter(Boolean);}
+function getGrandchildren(pid){const s=new Set();getChildren(pid).forEach(c=>getChildren(c.id).forEach(gc=>s.add(gc.id)));return[...s].map(id=>persons.find(p=>p.id===id)).filter(Boolean);}
+function getGreatGrandchildren(pid){const s=new Set();getGrandchildren(pid).forEach(gc=>getChildren(gc.id).forEach(ggc=>s.add(ggc.id)));return[...s].map(id=>persons.find(p=>p.id===id)).filter(Boolean);}
+function getGrandparents(pid){const s=new Set();getParents(pid).forEach(p2=>getParents(p2.id).forEach(gp=>s.add(gp.id)));return[...s].map(id=>persons.find(p=>p.id===id)).filter(Boolean);}
+function getGreatGrandparents(pid){const s=new Set();getGrandparents(pid).forEach(gp=>getParents(gp.id).forEach(ggp=>s.add(ggp.id)));return[...s].map(id=>persons.find(p=>p.id===id)).filter(Boolean);}
+function getSiblings(pid){
+  const myPar=new Set(relations.filter(r=>(r.type==='parent'||r.type==='adopted')&&r.target===pid).map(r=>r.source));
+  if(!myPar.size)return[];const s=new Set();
+  myPar.forEach(par=>relations.filter(r=>(r.type==='parent'||r.type==='adopted')&&r.source===par&&r.target!==pid).forEach(r=>s.add(r.target)));
+  return[...s].map(id=>persons.find(p=>p.id===id)).filter(Boolean);}
+function sharedParents(a,b){const ap=new Set(relations.filter(r=>(r.type==='parent'||r.type==='adopted')&&r.target===a).map(r=>r.source));return relations.filter(r=>(r.type==='parent'||r.type==='adopted')&&r.target===b&&ap.has(r.source)).length;}
+function connLabel(r,p,other){
+  if(r.type==='partner')return'Su pareja';
+  const g=other?.gender;
+  if(r.source===p.id){if(r.type==='adopted')return g==='female'?'Su hija adoptiva':'Su hijo adoptivo';return g==='male'?'Su hijo':g==='female'?'Su hija':'Su hijo/a';}
+  else{if(r.type==='adopted')return g==='female'?'Su madre adoptiva':'Su padre adoptivo';return g==='male'?'Su padre':g==='female'?'Su madre':'Su padre/madre';}}
+function findDuplicates(fn,ln,bd){
+  const f=(fn||'').toLowerCase().trim(),l=(ln||'').toLowerCase().trim();
+  return persons.filter(p=>{
+    const pf=(p.firstName||'').toLowerCase().trim();
+    const pl=(p.lastName||'').toLowerCase().trim();
+    // Exact first name match required — no partial substring matching
+    const exactName=f&&pf&&pf===f;
+    // OR very similar: one is prefix of other AND both are long enough (5+ chars)
+    const similarName=f&&pf&&f.length>=5&&pf.length>=5&&(pf===f.slice(0,-1)||f===pf.slice(0,-1));
+    const nameMatch=exactName||similarName;
+    // Must ALSO match last name OR birth year — name alone is not enough
+    const surnameMatch=l&&pl&&pl===l;
+    const yearMatch=bd&&p.birthDate&&bd.slice(0,4)===p.birthDate.slice(0,4);
+    return nameMatch&&(surnameMatch||yearMatch);});}
+
+// ── CUSTOM MODALS (replace native confirm/alert) ──
+function showConfirm(title,body,onYes,onNo,yesLabel='Sí, continuar',noLabel='Cancelar',yesClass='pri'){
+  document.getElementById('cm-title').textContent=title;
+  document.getElementById('cm-body').innerHTML=body;
+  document.getElementById('cm-btns').innerHTML=`
+    <button class="cm-btn" onclick="closeConfirm();${onNo?'('+onNo+')()':''}">${noLabel}</button>
+    <button class="cm-btn ${yesClass}" onclick="closeConfirm();(${onYes})()">${yesLabel}</button>`;
+  document.getElementById('confirm-modal').classList.add('open');}
+function closeConfirm(){document.getElementById('confirm-modal').classList.remove('open');}
+
+let toastT;
+function toast(msg,type='ok'){clearTimeout(toastT);const el=document.getElementById('toast');el.textContent=msg;el.className='show '+type;toastT=setTimeout(()=>el.className='',3500);}
+// ══════ VIEWER IDENTITY ══════
+function setViewer(pid){
+  const p=persons.find(x=>x.id===pid);
+  if(!p)return;
+  viewerId=pid;
+  try{localStorage.setItem(VK,pid)}catch(e){}
+  updateGraph(); // re-render with new gold ring
+  updateViewerBadge();
+  showProfile(p);
+  toast(`Ahora ves la red desde tu perspectiva ✓`,'ok');}
+
+function updateViewerBadge(){
+  const p=persons.find(x=>x.id===viewerId);
+  const el=document.getElementById('viewer-badge');
+  if(!el)return;
+  if(p&&fullName(p)!=='Sin nombre'){
+    el.textContent=`Viendo como: ${p.firstName}`;
+    document.getElementById('viewer-badge-txt').textContent=`Viendo como ${p.firstName}`;
+    el.style.display='flex';
+  } else {
+    el.style.display='none';
+  }}
+
+let actT;
+function addActivity(name,action){clearTimeout(actT);const el=document.getElementById('act');el.textContent=`✨ ${name} ${action}`;el.classList.add('on');actT=setTimeout(()=>el.classList.remove('on'),4000);}
+
+let magicT;
+function showMagicMoment(person,originPid){
+  clearTimeout(magicT);
+  const el=document.getElementById('magic-toast');
+  const nm=document.getElementById('mt-name');
+  const sub=document.getElementById('mt-sub');
+  const acts=document.getElementById('mt-actions');
+  if(!el||!nm)return;
+  nm.textContent=fullName(person)+' ya está en el árbol';
+  const msgs=['¿Agregamos a alguien más de su familia?','El árbol crece con cada persona que agregas','Cada nodo es una historia que vale la pena guardar'];
+  sub.textContent=msgs[Math.floor(Math.random()*msgs.length)];
+  // Contextual action buttons
+  const hasFather=getParents(person.id).some(p=>p.gender==='male');
+  const hasMother=getParents(person.id).some(p=>p.gender==='female');
+  let btnHtml='';
+  if(!hasFather)btnHtml+=`<button class="mta-btn" style="border-color:#3b82f6;color:#3b82f6" onclick="hideMagic();addRelativeOf('${person.id}','father')">+ Padre</button>`;
+  if(!hasMother)btnHtml+=`<button class="mta-btn" style="border-color:#ec4899;color:#ec4899" onclick="hideMagic();addRelativeOf('${person.id}','mother')">+ Madre</button>`;
+  btnHtml+=`<button class="mta-btn" style="border-color:#a8906c;color:#a8906c" onclick="hideMagic()">Después</button>`;
+  acts.innerHTML=btnHtml;
+  el.classList.add('show');
+  magicT=setTimeout(hideMagic,6000);}
+function hideMagic(){const el=document.getElementById('magic-toast');if(el)el.classList.remove('show');}
+
+// ══════ HOY EN TU FAMILIA ══════
+let _hoyCollapsed=false;
+try{_hoyCollapsed=localStorage.getItem('raices_hoy_collapsed')==='1'}catch(e){}
+
+function adjustBodyTop(){
+  const hoyWrap=document.getElementById('hoy-wrap');
+  const body=document.getElementById('body');
+  const panel=document.getElementById('panel');
+  const hoyH=(!_hoyCollapsed&&hoyWrap)?hoyWrap.offsetHeight||0:0;
+  const totalTop=56+hoyH;
+  if(body)body.style.top=totalTop+'px';
+  if(panel)panel.style.top=totalTop+'px';}
+
+function toggleHoy(){
+  _hoyCollapsed=!_hoyCollapsed;
+  try{localStorage.setItem('raices_hoy_collapsed',_hoyCollapsed?'1':'0')}catch(e){}
+  document.getElementById('hoy-wrap')?.classList.toggle('collapsed',_hoyCollapsed);
+  document.getElementById('hoy-show-btn')?.classList.toggle('visible',_hoyCollapsed);
+  const btn=document.getElementById('hoy-toggle');
+  if(btn){
+    btn.innerHTML=_hoyCollapsed
+      ?'<svg width="10" height="10" viewBox="0 0 10 6" fill="none"><path d="M1 1l4 4 4-4" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></svg> Mostrar'
+      :'<svg width="10" height="10" viewBox="0 0 10 6" fill="none"><path d="M1 5l4-4 4 4" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></svg> Ocultar';
+  }
+  setTimeout(adjustBodyTop,50);}
+
+function parseLocalDate(str){
+  // Parse YYYY-MM-DD without timezone conversion — avoid UTC offset bug
+  if(!str||str.length<5)return null;
+  const parts=str.split('-');
+  if(parts.length<2)return null;
+  return{y:+parts[0],m:+parts[1],d:parts[2]?+parts[2]:1};}
+
+function getTodayEvents(){
+  const now=new Date();
+  const todayM=now.getMonth()+1;
+  const todayD=now.getDate();
+  const todayY=now.getFullYear();
+  const events=[];
+
+  persons.forEach(p=>{
+    const bd=parseLocalDate(p.birthDate);
+    const dd=parseLocalDate(p.deathDate);
+    const hasBirth=!!bd;
+    const hasDeath=!!dd;
+
+    if(hasBirth&&bd.m===todayM&&bd.d===todayD){
+      if(hasDeath){
+        if(dd.m===todayM&&dd.d===todayD){
+          events.push({type:'both',person:p,priority:1,bY:bd.y,dY:dd.y,age:todayY-bd.y});
+        } else {
+          events.push({type:'remember_birthday',person:p,priority:2,bY:bd.y,age:todayY-bd.y});
+        }
+      } else {
+        events.push({type:'birthday',person:p,priority:3,bY:bd.y,age:todayY-bd.y});
+      }
+    }
+    if(hasDeath&&dd.m===todayM&&dd.d===todayD){
+      const alreadyBoth=events.find(e=>e.person.id===p.id&&e.type==='both');
+      if(!alreadyBoth) events.push({type:'anniversary',person:p,priority:1,dY:dd.y,years:todayY-dd.y});
+    }
+  });
+
+  return events.sort((a,b)=>a.priority-b.priority).slice(0,10);}
+
+function showEmptyState(){
+  // Show a helpful overlay when the tree is empty
+  const W=svgEl.parentElement?.clientWidth||900;
+  const H=svgEl.parentElement?.clientHeight||700;
+  const svg=d3.select(svgEl);
+  svg.select('#empty-state').remove();
+  if(persons.length>0){return;}
+  const g=svg.append('g').attr('id','empty-state').attr('transform',`translate(${W/2},${H/2})`);
+  g.append('text').attr('text-anchor','middle').attr('y',-60).attr('font-size','32').text('🌿');
+  g.append('text').attr('text-anchor','middle').attr('y',-20).attr('font-size','18').attr('fill','#a8906c').attr('font-family','Playfair Display,serif').text('Tu árbol está vacío');
+  g.append('text').attr('text-anchor','middle').attr('y',8).attr('font-size','13').attr('fill','#c4a882').attr('font-family','DM Sans,sans-serif').text('Comienza agregando a tu familia');
+  // Add person button
+  const btn=g.append('g').attr('cursor','pointer').attr('transform','translate(0,50)').on('click',()=>openPanel('person'));
+  btn.append('rect').attr('x',-80).attr('y',-18).attr('width',160).attr('height',36).attr('rx',18).attr('fill','#16a34a');
+  btn.append('text').attr('text-anchor','middle').attr('dy','.36em').attr('font-size','13').attr('fill','#fff').attr('font-family','DM Sans,sans-serif').attr('font-weight','600').text('+ Agregar primera persona');
+  // Import option
+  const imp=g.append('g').attr('cursor','pointer').attr('transform','translate(0,100)').on('click',()=>document.getElementById('imp').click());
+  imp.append('text').attr('text-anchor','middle').attr('font-size','12').attr('fill','#c4a882').attr('font-family','DM Sans,sans-serif').text('o importa un backup existente');
+}
+
+function renderHoy(){
+  const events=getTodayEvents();
+  const cards=document.getElementById('hoy-cards');
+  const sub=document.getElementById('hoy-sub');
+  if(!cards||!sub)return;
+
+  if(!_hoyCollapsed){
+    document.getElementById('hoy-wrap')?.classList.remove('collapsed');
+  } else {
+    document.getElementById('hoy-wrap')?.classList.add('collapsed');
+    document.getElementById('hoy-show-btn')?.classList.add('visible');
+  }
+
+  const today=new Date().toLocaleDateString('es-CL',{weekday:'long',day:'numeric',month:'long'});
+  sub.textContent=events.length
+    ?`${events.length} evento${events.length!==1?'s':''} hoy — ${today}`
+    :`Sin eventos hoy — ${today}`;
+
+  setTimeout(adjustBodyTop,30);
+  if(!events.length){
+    cards.innerHTML=`<div class="hoy-card empty"><div class="hoy-ico">📅</div><div><div class="hoy-card-name">Sin eventos hoy</div><div class="hoy-card-txt">Explora la red o agrega fechas a los perfiles</div></div></div>`;
+    return;}
+
+  cards.innerHTML=events.map(ev=>{
+    const p=ev.person;
+    const nm=p.firstName+(p.lastName?' '+p.lastName:'');
+    let ico,txt,cls;
+    if(ev.type==='birthday'){
+      ico='🎂';cls='birthday';
+      txt=ev.bY?`Cumple ${ev.age} año${ev.age!==1?'s':''} hoy`:'Hoy está de cumpleaños';
+    } else if(ev.type==='remember_birthday'){
+      ico='🕊️';cls='remember';
+      txt=ev.bY?`Hoy habría cumplido ${ev.age} años`:'Hoy recordamos su cumpleaños';
+    } else if(ev.type==='anniversary'){
+      ico='🕊️';cls='anniversary';
+      txt=ev.years>0?`Lo recordamos con cariño · hace ${ev.years} año${ev.years!==1?'s':''}`:'Lo recordamos con cariño';
+    } else {
+      ico='🕊️';cls='remember';
+      txt='Hoy recordamos a esta persona';
+    }
+    return`<div class="hoy-card ${cls}" onclick="event.stopPropagation();const _p=persons.find(x=>x.id==='${p.id}');if(_p)showProfile(_p);" title="Ver perfil de ${nm}">
+      <div class="hoy-ico">${ico}</div>
+      <div style="min-width:0">
+        <div class="hoy-card-name">${nm}</div>
+        <div class="hoy-card-txt">${txt}</div>
+      </div>
+    </div>`;
+  }).join('');}
+
+function updateStats(){
+  const f=persons.filter(p=>p.photo).length,h=persons.filter(p=>p.story?.length>10).length,ng=numGens();
+  document.getElementById('st-p').textContent=persons.length;document.getElementById('st-f').textContent=f;document.getElementById('st-h').textContent=h;
+  document.getElementById('logo-st').textContent=`${ng} generación${ng!==1?'es':''} · ${persons.length} familiares`;
+  // Show creator name from 'me' node if it has a real name
+  const meNode=persons.find(p=>p.id==='me');
+  const creatorEl=document.getElementById('logo-creator');
+  const creatorNm=document.getElementById('creator-name');
+  if(meNode&&creatorEl&&creatorNm){
+    const nm=fullName(meNode);
+    const isPlaceholder=nm.toLowerCase().includes('yo')||nm.toLowerCase().includes('tu apellido')||nm.trim().length<3;
+    if(!isPlaceholder){
+      creatorNm.textContent=nm;
+      creatorEl.style.display='block';
+    } else {
+      creatorEl.style.display='none';
+    }
+  }
+  renderHoy();
+  updateViewerBadge();
+  if(persons.length===0)showEmptyState();
+  else d3.select(svgEl).select('#empty-state').remove();}
+
+function setSyncStatus(s,m){const d=document.getElementById('sync-dot'),l=document.getElementById('sync-lbl');if(d)d.className=s;if(l)l.textContent=m;}
+
+// ══════ ONBOARDING WIZARD ══════
+const WZ_STEPS=['me','mom','dad','siblings','grandparents','done'];
+let wz={step:0,data:{me:{},mom:{},dad:{},siblings:[],maternal:{gf:{},gm:{}},paternal:{gf:{},gm:{}}}};
+
+function wzRender(){
+  const body=document.getElementById('wc-body');
+  const prog=document.getElementById('wc-prog');
+  const stepLbl=document.getElementById('wc-step-lbl');
+  const stepName=document.getElementById('wc-step-name');
+  const s=wz.step;
+  const pct=[14,30,46,60,78,100][s]||100;
+  const names=['Tu nombre','Tu madre','Tu padre','Hermanos','Abuelos','¡Listo!'];
+  if(prog)prog.style.width=pct+'%';
+  if(stepLbl)stepLbl.textContent=`Paso ${s+1} de 6`;
+  if(stepName)stepName.textContent=names[s]||'';
+  const steps=[wzStepMe,wzStepMom,wzStepDad,wzStepSiblings,wzStepGrandparents,wzStepDone];
+  if(steps[s])body.innerHTML=steps[s]();
+  // Auto-focus first input
+  setTimeout(()=>{const inp=body.querySelector('input');if(inp)inp.focus();},80);
+}
+
+function wzStepMe(){return`
+  <div class="wc-q">¿Cómo te llamas?</div>
+  <div class="wc-hint">Este será tu nodo central — el punto de partida del árbol</div>
+  <input class="wc-inp" id="wz-me-fn" placeholder="Tu nombre" value="${wz.data.me.firstName||''}" oninput="wz.data.me.firstName=this.value">
+  <input class="wc-inp" style="margin-top:8px" id="wz-me-ln" placeholder="Tu apellido" value="${wz.data.me.lastName||''}" oninput="wz.data.me.lastName=this.value">
+  <div class="wc-gender-row">
+    <button class="wc-gender-btn${wz.data.me.gender==='male'?' sel':''}" onclick="wz.data.me.gender='male';wzRender()">Hombre</button>
+    <button class="wc-gender-btn${wz.data.me.gender==='female'?' sel':''}" onclick="wz.data.me.gender='female';wzRender()">Mujer</button>
+  </div>
+  <button class="wc-next" onclick="wzNext()" id="wz-next">Continuar →</button>
+  <div class="wc-skip-lnk" onclick="dismissWelcome()">Saltar y entrar directo</div>`;}
+
+function wzStepMom(){return`
+  <div class="wc-q">¿Cómo se llamaba tu mamá?</div>
+  <div class="wc-hint">Si no la conociste o no quieres agregarla ahora, puedes omitir este paso</div>
+  <input class="wc-inp" id="wz-mom-fn" placeholder="Nombre de tu madre" value="${wz.data.mom.firstName||''}" oninput="wz.data.mom.firstName=this.value">
+  <input class="wc-inp" style="margin-top:8px" placeholder="Apellido (opcional)" value="${wz.data.mom.lastName||''}" oninput="wz.data.mom.lastName=this.value">
+  <input class="wc-yr-inp" type="number" placeholder="Año de nacimiento (opcional)" value="${wz.data.mom.birthYear||''}" oninput="wz.data.mom.birthYear=this.value" min="1850" max="2010">
+  <button class="wc-next" onclick="wzNext()">Continuar →</button>
+  <div class="wc-skip-lnk" onclick="wzSkip()">No sé o prefiero omitir</div>`;}
+
+function wzStepDad(){return`
+  <div class="wc-q">¿Y tu papá?</div>
+  <div class="wc-hint">Puedes omitirlo si no aplica o no lo conociste</div>
+  <input class="wc-inp" placeholder="Nombre de tu padre" value="${wz.data.dad.firstName||''}" oninput="wz.data.dad.firstName=this.value">
+  <input class="wc-inp" style="margin-top:8px" placeholder="Apellido (opcional)" value="${wz.data.dad.lastName||''}" oninput="wz.data.dad.lastName=this.value">
+  <input class="wc-yr-inp" type="number" placeholder="Año de nacimiento (opcional)" value="${wz.data.dad.birthYear||''}" oninput="wz.data.dad.birthYear=this.value" min="1850" max="2010">
+  <button class="wc-next" onclick="wzNext()">Continuar →</button>
+  <div class="wc-skip-lnk" onclick="wzSkip()">No sé o prefiero omitir</div>`;}
+
+function wzStepSiblings(){
+  const sibs=wz.data.siblings;
+  while(sibs.length<1)sibs.push({name:'',gender:'unknown'});
+  const rows=sibs.map((s,i)=>`<div class="wc-sib-item">
+    <input class="wc-sib-inp" placeholder="Nombre del hermano/a" value="${s.name}" oninput="wz.data.siblings[${i}].name=this.value">
+    <select style="background:#f9f5f0;border:1.5px solid #e2d5c3;border-radius:8px;padding:9px 8px;font-size:12px;color:#78563a;outline:none" onchange="wz.data.siblings[${i}].gender=this.value">
+      <option value="unknown"${s.gender==='unknown'?' selected':''}>?</option>
+      <option value="male"${s.gender==='male'?' selected':''}>H</option>
+      <option value="female"${s.gender==='female'?' selected':''}>M</option>
+    </select>
+  </div>`).join('');
+  return`<div class="wc-q">¿Tienes hermanos?</div>
+  <div class="wc-hint">Escribe sus nombres. Puedes agregar varios o dejar en blanco si no tienes.</div>
+  <div class="wc-siblings-row">${rows}</div>
+  <button class="wc-add-sib" style="margin-top:8px;width:100%" onclick="wz.data.siblings.push({name:'',gender:'unknown'});wzRender()">+ Agregar otro hermano/a</button>
+  <button class="wc-next" style="margin-top:12px" onclick="wzNext()">Continuar →</button>
+  <div class="wc-skip-lnk" onclick="wzSkip()">No tengo o prefiero omitir</div>`;}
+
+function wzStepGrandparents(){return`
+  <div class="wc-q">¿Conociste a tus abuelos?</div>
+  <div class="wc-hint">Solo los nombres — puedes completar el resto después</div>
+  <div style="font-size:10px;color:#a8906c;text-transform:uppercase;letter-spacing:.07em;margin-bottom:6px">Por parte de madre</div>
+  <input class="wc-inp" style="margin-bottom:7px" placeholder="Abuelo materno (nombre)" value="${wz.data.maternal.gf.firstName||''}" oninput="wz.data.maternal.gf.firstName=this.value">
+  <input class="wc-inp" placeholder="Abuela materna (nombre)" value="${wz.data.maternal.gm.firstName||''}" oninput="wz.data.maternal.gm.firstName=this.value">
+  <div style="font-size:10px;color:#a8906c;text-transform:uppercase;letter-spacing:.07em;margin:10px 0 6px">Por parte de padre</div>
+  <input class="wc-inp" style="margin-bottom:7px" placeholder="Abuelo paterno (nombre)" value="${wz.data.paternal.gf.firstName||''}" oninput="wz.data.paternal.gf.firstName=this.value">
+  <input class="wc-inp" placeholder="Abuela paterna (nombre)" value="${wz.data.paternal.gm.firstName||''}" oninput="wz.data.paternal.gm.firstName=this.value">
+  <button class="wc-next" style="margin-top:14px" onclick="wzFinish()">Crear mi árbol →</button>
+  <div class="wc-skip-lnk" onclick="wzFinish()">Omitir y crear árbol</div>`;}
+
+function wzStepDone(){
+  // Build summary
+  const added=[{nm:wz.data.me.firstName+' '+wz.data.me.lastName,rl:'Tú',c:'#f59e0b'}];
+  if(wz.data.mom.firstName)added.push({nm:wz.data.mom.firstName,rl:'Tu madre',c:'#ec4899'});
+  if(wz.data.dad.firstName)added.push({nm:wz.data.dad.firstName,rl:'Tu padre',c:'#3b82f6'});
+  wz.data.siblings.forEach(s=>{if(s.name)added.push({nm:s.name,rl:'Hermano/a',c:s.gender==='male'?'#3b82f6':'#ec4899'});});
+  if(wz.data.maternal.gm.firstName)added.push({nm:wz.data.maternal.gm.firstName,rl:'Abuela materna',c:'#ec4899'});
+  if(wz.data.maternal.gf.firstName)added.push({nm:wz.data.maternal.gf.firstName,rl:'Abuelo materno',c:'#3b82f6'});
+  if(wz.data.paternal.gm.firstName)added.push({nm:wz.data.paternal.gm.firstName,rl:'Abuela paterna',c:'#ec4899'});
+  if(wz.data.paternal.gf.firstName)added.push({nm:wz.data.paternal.gf.firstName,rl:'Abuelo paterno',c:'#3b82f6'});
+  const rows=added.map(a=>`<div class="wc-sum-row"><div class="wc-sum-av" style="background:${a.c}">${a.nm[0]||'?'}</div><div><div class="wc-sum-nm">${a.nm}</div><div class="wc-sum-rl">${a.rl}</div></div></div>`).join('');
+  return`<div class="wc-q" style="font-size:22px">¡Tu árbol está listo! 🌿</div>
+  <div class="wc-hint">${added.length} personas agregadas. Puedes seguir construyendo desde la app.</div>
+  <div class="wc-summary">${rows}</div>
+  <button class="wc-next" style="margin-top:14px" onclick="dismissWelcome()">Explorar mi árbol →</button>`;}
+
+function wzNext(){
+  const s=wz.step;
+  if(s===0&&!wz.data.me.firstName?.trim()){toast('Escribe al menos tu nombre','err');return;}
+  wz.step=Math.min(s+1,5);wzRender();}
+function wzSkip(){wz.step=Math.min(wz.step+1,5);wzRender();}
+
+function wzFinish(){
+  const meId='me';
+  // ── Only clean if all persons are still seed placeholders ──
+  // If real data already exists, don't wipe it
+  const hasRealData=persons.some(p=>p.id!==meId&&p.firstName&&!p.firstName.startsWith('Abuelo')&&!p.firstName.startsWith('Abuela')&&!p.firstName.startsWith('Yo'));
+  if(!hasRealData){
+    persons=persons.filter(p=>p.id===meId);
+    relations=[];
+  }
+
+  // ── Update 'me' node with real name ──
+  const meNode=persons.find(p=>p.id===meId);
+  if(meNode){
+    meNode.firstName=(wz.data.me.firstName||'Yo').trim();
+    meNode.lastName=(wz.data.me.lastName||'').trim();
+    if(wz.data.me.gender&&wz.data.me.gender!=='unknown')meNode.gender=wz.data.me.gender;
+  }
+
+  function mkP(d,gender){
+    return{id:uid(),firstName:(d.firstName||'').trim(),lastName:(d.lastName||'').trim(),
+      gender,birthDate:d.birthYear?`${d.birthYear}-01-01`:'',deathDate:'',
+      location:'',story:'',photo:null,status:'unverified',notes:''};}
+  function addParent(srcId,tgtId){
+    if(srcId&&tgtId&&!isDupe(srcId,tgtId))
+      relations.push({id:uid(),source:srcId,target:tgtId,type:'parent'});}
+
+  // ── Create mom and save her ID directly ──
+  let momId=null,dadId=null;
+  if(wz.data.mom.firstName?.trim()){
+    const mom=mkP(wz.data.mom,'female');
+    persons.push(mom);momId=mom.id;addParent(momId,meId);}
+  if(wz.data.dad.firstName?.trim()){
+    const dad=mkP(wz.data.dad,'male');
+    persons.push(dad);dadId=dad.id;addParent(dadId,meId);}
+  // Add partner relation between parents if both exist
+  if(momId&&dadId)relations.push({id:uid(),source:dadId,target:momId,type:'partner'});
+
+  // ── Siblings — use saved IDs ──
+  wz.data.siblings.forEach(s=>{
+    if(!s.name?.trim())return;
+    const sib=mkP({firstName:s.name},s.gender||'unknown');
+    persons.push(sib);
+    addParent(momId,sib.id);
+    addParent(dadId,sib.id);});
+
+  // ── Grandparents — use saved parent IDs ──
+  if(momId){
+    if(wz.data.maternal.gf.firstName?.trim()){
+      const gf=mkP(wz.data.maternal.gf,'male');persons.push(gf);addParent(gf.id,momId);}
+    if(wz.data.maternal.gm.firstName?.trim()){
+      const gm=mkP(wz.data.maternal.gm,'female');persons.push(gm);addParent(gm.id,momId);}
+  }
+  if(dadId){
+    if(wz.data.paternal.gf.firstName?.trim()){
+      const gf=mkP(wz.data.paternal.gf,'male');persons.push(gf);addParent(gf.id,dadId);}
+    if(wz.data.paternal.gm.firstName?.trim()){
+      const gm=mkP(wz.data.paternal.gm,'female');persons.push(gm);addParent(gm.id,dadId);}
+  }
+  save();wz.step=5;wzRender();}
+
+function showIdentityHelper(){
+  toast('Abre cualquier perfil y pulsa "Este soy yo" para cambiar tu perspectiva','info');}
+window.showIdentityHelper=showIdentityHelper;
+
+function dismissWelcome(){
+  document.getElementById('welcome').style.display='none';
+  try{localStorage.setItem('raices_seen','1')}catch(e){}
+  d3Nodes=[];
+  // Reinit graph with potentially updated data from wizard
+  initGraph();}
+function showWelcome(){
+  document.getElementById('welcome').style.display='flex';
+  wz={step:0,data:{me:{},mom:{},dad:{},siblings:[{name:'',gender:'unknown'}],maternal:{gf:{},gm:{}},paternal:{gf:{},gm:{}}}};
+  wzRender();}
+
+function compressPhoto(file,cb){
+  // Smart compression: 220px max, quality 0.72 → ~15-25KB per photo
+  const canvas=document.createElement('canvas'),img=new Image();
+  img.onload=()=>{
+    const M=220;let w=img.width,h=img.height;
+    if(w>h){if(w>M){h=Math.round(h*M/w);w=M}}else{if(h>M){w=Math.round(w*M/h);h=M}}
+    canvas.width=w;canvas.height=h;
+    const ctx=canvas.getContext('2d');
+    ctx.imageSmoothingEnabled=true;ctx.imageSmoothingQuality='high';
+    ctx.drawImage(img,0,0,w,h);
+    const b64=canvas.toDataURL('image/jpeg',.72);
+    // Check storage health
+    checkStorageHealth();
+    cb(b64);URL.revokeObjectURL(img.src);};
+  img.src=URL.createObjectURL(file);}
+
+function checkStorageHealth(){
+  try{
+    const data=JSON.stringify({persons,relations});
+    const kb=Math.round(new Blob([data]).size/1024);
+    const photos=persons.filter(p=>p.photo).length;
+    if(kb>3500&&!window._storageWarned){
+      window._storageWarned=true;
+      toast(`Atención: ${photos} fotos ocupan ~${Math.round(kb/1024*10)/10}MB. Conecta Firebase para escalar sin límites.`,'info');}
+  }catch(e){}}
+function pickPhoto(pid,onDone){const inp=document.createElement('input');inp.type='file';inp.accept='image/*';inp.onchange=e=>{const f=e.target.files[0];if(!f)return;compressPhoto(f,b64=>{if(pid){const p=persons.find(x=>x.id===pid);if(p){p.photo=b64;save();updateGraph();if(onDone)onDone(b64)}}else if(onDone)onDone(b64);toast('📷 Foto agregada ✓','info');});};inp.click();}
+
+// ══════ HIERARCHICAL LAYOUT ══════
+let layoutMode='force'; // 'force' | 'tree'
+
+function setLayout(mode){
+  layoutMode=mode;
+  document.getElementById('lt-force')?.classList.toggle('active',mode==='force');
+  document.getElementById('lt-tree')?.classList.toggle('active',mode==='tree');
+  if(mode==='tree'){applyTreeLayout();}
+  else{
+    // Re-enable simulation
+    if(sim){sim.alpha(.5).restart();}
+    d3.select(svgEl).selectAll('g.nd').each(function(d){d.fx=null;d.fy=null;});
+    sim?.alpha(.5).restart();
+  }}
+
+function interleavePartners(ids){
+  const result=[];const placed=new Set();const idSet=new Set(ids);
+  ids.forEach(id=>{
+    if(placed.has(id))return;placed.add(id);result.push(id);
+    const pr=relations.find(r=>r.type==='partner'&&((r.source===id&&idSet.has(r.target))||(r.target===id&&idSet.has(r.source))));
+    if(pr){const pid2=pr.source===id?pr.target:pr.source;if(!placed.has(pid2)){placed.add(pid2);result.push(pid2);}}
+  });
+  return result;}
+
+function avgParentX(pid,positions){
+  const pars=getParents(pid).map(p=>positions.get(p.id)?.x).filter(x=>x!=null);
+  return pars.length?pars.reduce((a,b)=>a+b,0)/pars.length:null;}
+
+function computeTreePositions(W,H){
+  const gm=computeGens();if(!gm.size)return new Map();
+  const byGen=new Map();
+  persons.forEach(p=>{const g=gm.get(p.id)??0;(byGen.get(g)||(byGen.set(g,[]),byGen.get(g))).push(p.id);});
+  const genNums=[...byGen.keys()].sort((a,b)=>a-b);
+  const minG=Math.min(...genNums),maxG=Math.max(...genNums),numG=maxG-minG+1;
+  const positions=new Map();
+  const HGAP=Math.min(105, Math.max(70, W/(Math.max(...[...byGen.values()].map(a=>a.length))+2)));
+
+  genNums.forEach((g,gi)=>{
+    let ids=[...(byGen.get(g)||[])];
+    if(gi>0){
+      // Sort by parent average X
+      ids.sort((a,b)=>{
+        const ax=avgParentX(a,positions)??99999;
+        const bx=avgParentX(b,positions)??99999;
+        return ax-bx;});
+    }
+    ids=interleavePartners(ids);
+    const totalW=(ids.length-1)*HGAP;
+    const startX=W/2-totalW/2;
+    const y=H*.09+H*.82*((g-minG)/numG)+H*.82/numG*.5;
+    ids.forEach((id,i)=>positions.set(id,{x:startX+i*HGAP,y}));
+  });
+  return positions;}
+
+function applyTreeLayout(){
+  const W=svgEl.parentElement.clientWidth||900;
+  const H=svgEl.parentElement.clientHeight||700;
+  const pos=computeTreePositions(W,H);
+  // Fix all node positions (disable simulation movement)
+  if(sim)sim.stop();
+  d3.select(svgEl).selectAll('g.nd').each(function(d){
+    const p=pos.get(d.id);if(p){d.fx=p.x;d.fy=p.y;d.x=p.x;d.y=p.y;}
+  });
+  // Animate to new positions
+  d3.select(svgEl).selectAll('g.nd')
+    .transition().duration(600).ease(d3.easeCubicOut)
+    .attr('transform',d=>`translate(${d.x||0},${d.y||0})`);
+  d3.select(svgEl).selectAll('line.ln')
+    .transition().duration(600).ease(d3.easeCubicOut)
+    .attr('x1',d=>{const s=typeof d.source==='object'?d.source:d3Nodes.find(n=>n.id===d.source);return s?.x||0})
+    .attr('y1',d=>{const s=typeof d.source==='object'?d.source:d3Nodes.find(n=>n.id===d.source);return s?.y||0})
+    .attr('x2',d=>{const t=typeof d.target==='object'?d.target:d3Nodes.find(n=>n.id===d.target);return t?.x||0})
+    .attr('y2',d=>{const t=typeof d.target==='object'?d.target:d3Nodes.find(n=>n.id===d.target);return t?.y||0});}
+
+function initGraph(){
+  const W=svgEl.parentElement.clientWidth||900,H=svgEl.parentElement.clientHeight||700;
+  const svg=d3.select(svgEl).attr('width',W).attr('height',H);svg.selectAll('*').remove();
+  const defs=svg.append('defs');
+  ['parent','adopted'].forEach(t=>{defs.append('marker').attr('id','arr-'+t).attr('markerWidth',8).attr('markerHeight',6).attr('refX',28).attr('refY',3).attr('orient','auto').append('path').attr('d','M0,0 L8,3 L0,6 Z').attr('fill',t==='parent'?'#94a3b8':'#22c55e').attr('opacity',.8);});
+  const zoom=d3.zoom().scaleExtent([.05,4]).on('zoom',e=>svg.select('g.root').attr('transform',e.transform));
+  svg.call(zoom);
+  // Touch support
+  svgEl.addEventListener('touchstart',()=>svgEl.classList.add('grabbing'),{passive:true});
+  svgEl.addEventListener('touchend',()=>svgEl.classList.remove('grabbing'),{passive:true});
+  svg.on('click.desel',()=>{selectedId=null;renderHL();closePanel();});
+  const root=svg.append('g').attr('class','root');
+  root.append('g').attr('class','bands');root.append('g').attr('class','ll');root.append('g').attr('class','nl');
+  const gm=computeGens(),allG=[...new Set([...gm.values()])];
+  const minG=Math.min(...allG),maxG=Math.max(...allG),numG=maxG-minG+1;
+  const genYs={};for(let g=minG;g<=maxG;g++)genYs[g]=H*.08+H*.84*((g-minG)/numG)+H*.84/numG*.5;
+  window._genYs=genYs;window._gm=gm;
+  const bands=svg.select('.root .bands');
+  for(let g=minG;g<=maxG;g++){
+    const yT=genYs[g]-H*.84/numG*.5,bH=H*.84/numG;
+    if(g===0)bands.append('rect').attr('x',0).attr('y',yT).attr('width',W).attr('height',bH).attr('fill','rgba(34,197,94,.018)').attr('rx',0);
+    bands.append('line').attr('x1',0).attr('y1',yT).attr('x2',W).attr('y2',yT).attr('stroke','rgba(0,0,0,.07)').attr('stroke-width',.7).attr('stroke-dasharray','6,10');
+    const lbl=GL[String(g)]||(g>0?`+${g} gen.`:`${g} gen.`);
+    bands.append('text').attr('class','gen-lbl').attr('x',12).attr('y',yT+15).text(lbl);}
+  sim=d3.forceSimulation()
+    .force('link',d3.forceLink().id(d=>d.id).distance(d=>d.type==='partner'?80:125).strength(.55))
+    .force('charge',d3.forceManyBody().strength(-300))
+    .force('x',d3.forceX(W/2).strength(.04))
+    .force('collide',d3.forceCollide(50))
+    .force('y',d3.forceY(d=>{const g=gm.get(d.id);return g!=null?genYs[g]||H/2:H/2}).strength(.9));
+  updateGraph();}
+
+function updateGraph(){
+  const svg=d3.select(svgEl),ll=svg.select('.root .ll'),nl=svg.select('.root .nl');
+  const pos=new Map(d3Nodes.map(n=>[n.id,{x:n.x,y:n.y}]));
+  d3Nodes=persons.map(p=>({...p,x:pos.get(p.id)?.x,y:pos.get(p.id)?.y}));
+  const d3L=relations.map(r=>({...r}));
+  const gm=computeGens(),W=svgEl.parentElement.clientWidth||900,H=svgEl.parentElement.clientHeight||700;
+  const allG=[...new Set([...gm.values()])];
+  if(allG.length){const minG=Math.min(...allG),numG=Math.max(...allG)-minG+1;const genYs={};for(let g=minG;g<=minG+numG-1;g++)genYs[g]=H*.08+H*.84*((g-minG)/numG)+H*.84/numG*.5;sim?.force('y',d3.forceY(d=>{const g=gm.get(d.id);return g!=null?genYs[g]||H/2:H/2}).strength(.9));}
+  // Clip paths
+  const defs=svg.select('defs');
+  const clips=defs.selectAll('clipPath.phcp').data(d3Nodes,d=>d.id);clips.exit().remove();
+  const clipsE=clips.enter().append('clipPath').attr('class','phcp').attr('id',d=>'phc-'+d.id);clipsE.append('circle').attr('cx',0).attr('cy',0).attr('r',RN-4);
+  sim.nodes(d3Nodes);sim.force('link').links(d3L);
+  // Links
+  const lk=ll.selectAll('line.ln').data(d3L,d=>d.id);lk.exit().transition().duration(200).attr('opacity',0).remove();
+  const lkE=lk.enter().append('line').attr('class','ln').attr('opacity',0);
+  lkE.merge(lk).attr('stroke',d=>RC[d.type]?.c||'#475569').attr('stroke-width',d=>d.type==='partner'?1.3:1.8).attr('stroke-dasharray',d=>RC[d.type]?.dash||null).attr('marker-end',d=>['parent','adopted'].includes(d.type)?'url(#arr-'+d.type+')':null);
+  lkE.transition().duration(400).attr('opacity',.55);
+  // Nodes
+  const nd=nl.selectAll('g.nd').data(d3Nodes,d=>d.id);nd.exit().transition().duration(200).attr('opacity',0).remove();
+  const isMob=window.innerWidth<=640;
+  const touchR=isMob?RN+14:0; // larger invisible hit area on mobile
+  const drag=d3.drag()
+    .on('start',(ev,d)=>{
+      if(layoutMode==='tree')return; // disable drag in tree mode
+      if(!ev.active)sim.alphaTarget(.3).restart();d.fx=d.x;d.fy=d.y;svgEl.classList.add('grabbing');})
+    .on('drag',(ev,d)=>{
+      if(layoutMode==='tree')return;
+      d.fx=ev.x;d.fy=ev.y;})
+    .on('end',(ev,d)=>{
+      if(layoutMode==='tree')return;
+      if(!ev.active)sim.alphaTarget(0);d.fx=null;d.fy=null;svgEl.classList.remove('grabbing');});
+  const ndE=nd.enter().append('g').attr('class','nd').attr('cursor','pointer').attr('opacity',0).call(drag).on('click.sel',(ev,d)=>{ev.stopPropagation();selectedId=d.id;renderHL();const p=persons.find(x=>x.id===d.id);if(p)showProfile(p);});
+  ndE.append('circle').attr('r',RN+3).attr('fill','rgba(0,0,0,.08)').attr('transform','translate(0,1.5)');
+  ndE.append('circle').attr('class','nd-base').attr('r',RN);
+  if(touchR)ndE.append('circle').attr('r',touchR).attr('fill','transparent');
+  ndE.append('circle').attr('class','nd-track').attr('r',RN).attr('fill','none').attr('stroke','rgba(0,0,0,.1)').attr('stroke-width',3);
+  ndE.append('circle').attr('class','nd-arc').attr('r',RN).attr('fill','none').attr('stroke-width',3).attr('stroke-linecap','round').attr('transform','rotate(-90)');
+  ndE.append('image').attr('class','nd-ph').attr('x',-(RN-4)).attr('y',-(RN-4)).attr('width',(RN-4)*2).attr('height',(RN-4)*2).attr('preserveAspectRatio','xMidYMid slice');
+  ndE.append('text').attr('class','nd-in').attr('text-anchor','middle').attr('dy','.36em').attr('font-size','11').attr('font-weight','700').attr('pointer-events','none').style('font-family','DM Sans,sans-serif');
+  ndE.append('text').attr('class','nd-nm').attr('text-anchor','middle').attr('y',RN+14).attr('font-size','9.5').attr('pointer-events','none').style('font-family','DM Sans,sans-serif');
+  ndE.append('text').attr('class','nd-yr').attr('text-anchor','middle').attr('y',RN+24).attr('font-size','8.5').attr('fill','#a8906c').attr('pointer-events','none').style('font-family','DM Sans,sans-serif');
+  const ndA=ndE.merge(nd);
+  ndA.select('.nd-base').attr('fill',d=>nStyle(d).fill).attr('stroke',d=>nStyle(d).border).attr('stroke-width',d=>d.id==='me'?2.5:1.5);
+  ndA.select('.nd-arc').attr('stroke',d=>nStyle(d).ring).attr('stroke-dasharray',d=>{const c=compl(d);return`${CIRC*c/100} ${CIRC*(1-c/100)}`});
+  ndA.select('.nd-ph').attr('clip-path',d=>`url(#phc-${d.id})`).attr('href',d=>d.photo||'').attr('display',d=>d.photo?'block':'none');
+  ndA.select('.nd-in').text(d=>initials(d)).attr('fill',d=>nStyle(d).text).attr('display',d=>d.photo?'none':'block');
+  ndA.select('.nd-nm').text(d=>d.firstName||'').attr('fill','#78563a');
+  ndA.select('.nd-yr').text(d=>birthYear(d)||'');
+  ndE.transition().duration(500).delay((_,i)=>Math.min(i*22,500)).attr('opacity',1);
+  sim.on('tick',()=>{svg.selectAll('line.ln').attr('x1',d=>d.source?.x||0).attr('y1',d=>d.source?.y||0).attr('x2',d=>d.target?.x||0).attr('y2',d=>d.target?.y||0);svg.selectAll('g.nd').attr('transform',d=>`translate(${d.x||0},${d.y||0})`);});
+  sim.alpha(.4).restart();updateStats();
+  // Re-apply tree layout if active
+  if(layoutMode==='tree')setTimeout(applyTreeLayout,50);}
+
+function renderHL(){d3.select(svgEl).selectAll('.nd-base').attr('filter',d=>selectedId&&d.id===selectedId?`drop-shadow(0 0 8px ${nStyle(d).ring})`:'none');}
+
+function openPanel(mode,data){
+  const pc=document.getElementById('pnl-in');
+  if(mode==='profile'&&data)pc.innerHTML=profileHTML(data);
+  else if(mode==='person')pc.innerHTML=personFormHTML(data);
+  else if(mode==='rel')pc.innerHTML=relFormHTML();
+  document.getElementById('panel').classList.add('open');
+  if(mode==='person')setTimeout(()=>document.getElementById('pf-fn')?.focus(),80);}
+function closePanel(){document.getElementById('panel').classList.remove('open');}
+
+function ciHTML(p2,lbl,relId){const ns=nStyle(p2);const del=relId?`<button onclick="event.stopPropagation();deleteRel('${relId}')" title="Eliminar este vínculo" style="margin-left:auto;background:none;border:none;color:#d4c5b0;cursor:pointer;font-size:15px;line-height:1;padding:2px 4px;border-radius:4px;flex-shrink:0;transition:color .15s" onmouseover="this.style.color='#ef4444'" onmouseout="this.style.color='#d4c5b0'">×</button>`:'';return`<div class="ci" onclick="showProfile(persons.find(x=>x.id==='${p2.id}'))" style="position:relative">${p2.photo?`<img class="ci-av" src="${p2.photo}" style="border:1.5px solid ${ns.border}">`:`<div class="ci-av-txt" style="background:${ns.fill};border:1.5px solid ${ns.border};color:${ns.text}">${initials(p2)}</div>`}<div><div class="ci-nm">${fullName(p2)}</div><div class="ci-rl">${lbl}</div></div>${del}</div>`;}
+
+function deleteRel(rid){
+  const r=relations.find(x=>x.id===rid);
+  if(!r)return;
+  const pa=persons.find(x=>x.id===r.source),pb=persons.find(x=>x.id===r.target);
+  const typeLabel={parent:'parentesco',partner:'pareja',adopted:'adopción'};
+  const msg=`¿Eliminar el vínculo de ${typeLabel[r.type]||r.type} entre ${fullName(pa)||'?'} y ${fullName(pb)||'?'}?`;
+  const relId=rid;
+  showConfirm('Eliminar vínculo',msg,
+    `function(){relations=relations.filter(x=>x.id!=='${relId}');save();if(selectedId){const p=persons.find(x=>x.id===selectedId);if(p){updateGraph();showProfile(p);return;}}updateGraph();toast('Vínculo eliminado');}`,
+    null,'Eliminar','Cancelar','danger');
+  return;
+  relations=relations.filter(x=>x.id!==rid);
+  save();
+  if(selectedId){const p=persons.find(x=>x.id===selectedId);if(p){updateGraph();showProfile(p);return;}}
+  updateGraph();
+  toast('Vínculo eliminado','ok');}
+
+function showProfile(p){selectedId=p.id;renderHL();openPanel('profile',p);}
+function profileHTML(p){
+  const rel=p.id!=='me'?findRel(viewerId,p.id):null;
+  const sc=SC[p.status]||SC.unverified,c=compl(p),miss=missingTop(p),ns=nStyle(p);
+  const conns=relations.filter(r=>r.source===p.id||r.target===p.id).map(r=>{const oid=r.source===p.id?r.target:r.source,other=persons.find(x=>x.id===oid);return{other,lbl:connLabel(r,p,other),relId:r.id}}).filter(x=>x.other);
+  const sibs=getSiblings(p.id),grandkids=getGrandchildren(p.id),ggkids=getGreatGrandchildren(p.id),gparents=getGrandparents(p.id),ggparents=getGreatGrandparents(p.id);
+  const phEl=p.photo?`<div class="ph-wrap"><img class="ph-img" src="${p.photo}"><button class="ph-edit-btn" onclick="pickPhoto('${p.id}',()=>{save();updateGraph();showProfile(persons.find(x=>x.id==='${p.id}'))})">✎</button></div>`:`<div class="ph-empty" onclick="pickPhoto('${p.id}',()=>{save();updateGraph();showProfile(persons.find(x=>x.id==='${p.id}'))})"><span>📷</span><small>Agregar foto</small></div>`;
+  const by=birthYear(p),dy=p.deathDate?p.deathDate.slice(0,4):null;
+  function secHTML(label,items,genLbl){if(!items.length)return'';return`<div class="conn-hd">${label} (${items.length})</div>${items.map(x=>{const g=x.gender;const lbl=genLbl instanceof Function?genLbl(x,g):genLbl(g);return ciHTML(x,lbl);}).join('')}`;}
+  const hasFather=getParents(p.id).some(pp=>pp.gender==='male');
+  const hasMother=getParents(p.id).some(pp=>pp.gender==='female');
+  return`
+  <div class="pn-head"><div></div><button class="xb" onclick="closePanel();selectedId=null;renderHL()">×</button></div>
+  <div class="prof-top">${phEl}
+    <div class="prof-info">
+      <div class="prof-nm">${p.firstName} <span style="color:#374151">${p.lastName}</span></div>
+      ${by?`<div class="prof-yr">n.${by}${dy?` · †${dy}`:''}</div>`:''}
+      ${p.location?`<div class="prof-yr">📍 ${p.location}</div>`:''}
+      <div class="status-pill" style="background:${sc.c}18;border:1px solid ${sc.c}30;color:${sc.c}">● ${sc.lbl}</div>
+    </div>
+  </div>
+  ${rel?`<div class="rel-tag">🔗 Es ${rel}</div>`:''}
+  <div class="comp-wrap">
+    <div class="comp-top"><span>Perfil completado</span><span style="color:${ns.ring};font-weight:600">${c}%</span></div>
+    <div class="comp-track"><div class="comp-fill" style="width:${c}%;background:${ns.ring}"></div></div>
+  </div>
+  ${miss&&c<100?`<div class="comp-prompt">💡 Siguiente: <strong>${miss}</strong> de ${p.firstName}</div>`:''}
+  ${p.story?`<div class="story-box">"${p.story}"</div>`:''}
+  ${conns.length?`<div class="conn-hd">Vínculos directos (${conns.length})</div>${conns.map(c2=>ciHTML(c2.other,c2.lbl,c2.relId)).join('')}`:''}
+  ${sibs.length?`<div class="conn-hd">Hermanos/as (${sibs.length})</div>${sibs.map(s=>{const sp=sharedParents(p.id,s.id),g=s.gender;const lbl=sp>=2?(g==='male'?'Hermano':g==='female'?'Hermana':'Hermano/a'):(g==='male'?'Medio hermano':g==='female'?'Media hermana':'Medio/a');return ciHTML(s,lbl);}).join('')}`:''}
+  ${gparents.length?`<div class="conn-hd">Abuelos/as (${gparents.length})</div>${gparents.map(gp=>ciHTML(gp,gp.gender==='male'?'Su abuelo':gp.gender==='female'?'Su abuela':'Su abuelo/a')).join('')}`:''}
+  ${ggparents.length?`<div class="conn-hd">Bisabuelos/as (${ggparents.length})</div>${ggparents.map(ggp=>ciHTML(ggp,ggp.gender==='male'?'Su bisabuelo':ggp.gender==='female'?'Su bisabuela':'Su bisabuelo/a')).join('')}`:''}
+  ${grandkids.length?`<div class="conn-hd">Nietos/as (${grandkids.length})</div>${grandkids.map(gc=>ciHTML(gc,gc.gender==='male'?'Su nieto':gc.gender==='female'?'Su nieta':'Su nieto/a')).join('')}`:''}
+  ${ggkids.length?`<div class="conn-hd">Bisnietos/as (${ggkids.length})</div>${ggkids.map(ggc=>ciHTML(ggc,ggc.gender==='male'?'Su bisnieto':ggc.gender==='female'?'Su bisnieta':'Su bisnieto/a')).join('')}`:''}
+  <div class="ctx-sec">
+    <div class="ctx-hd">Ampliar esta rama</div>
+    <div class="ctx-btns">
+      ${!hasFather?`<button class="ctx-btn" style="border-color:#3b82f6;color:#60a5fa" onclick="addRelativeOf('${p.id}','father')">👨 Padre</button>`:''}
+      ${!hasMother?`<button class="ctx-btn" style="border-color:#ec4899;color:#f472b6" onclick="addRelativeOf('${p.id}','mother')">👩 Madre</button>`:''}
+      <button class="ctx-btn" style="border-color:#a78bfa;color:#c4b5fd" onclick="addRelativeOf('${p.id}','child')">🧒 Hijo/a</button>
+      <button class="ctx-btn" style="border-color:#ec4899;color:#f472b6" onclick="addRelativeOf('${p.id}','partner')">💑 Pareja</button>
+    </div>
+  </div>
+  ${p.id!==viewerId?`<div style="margin-top:10px;padding-top:10px;border-top:1px solid #f0e8dc">
+    <button onclick="setViewer('${p.id}')" style="width:100%;background:#fffbeb;border:1.5px solid #fcd34d;border-radius:8px;padding:9px;font-size:12.5px;color:#92400e;cursor:pointer;font-family:inherit;font-weight:500;transition:all .15s" onmouseover="this.style.background='#fef3c7'" onmouseout="this.style.background='#fffbeb'">
+      👤 Este soy yo — ver desde mi perspectiva
+    </button>
+  </div>`:''}
+  <button class="edit-lnk" onclick="openPanel('person',persons.find(x=>x.id==='${p.id}'))">✏ Editar perfil completo</button>`;}
+
+// ── Person Form ──
+function personFormHTML(p){const e=!!p;return`
+  <div class="pn-head"><div class="pn-title">${e?'Editar':'Nueva persona'}</div><button class="xb" onclick="closePanel()">×</button></div>
+  <div class="form-ph-wrap">${p?.photo?`<div class="ph-wrap"><img class="ph-img" src="${p.photo}"><button class="ph-edit-btn" onclick="pickPhotoForm()">✎</button></div>`:`<div class="ph-empty" onclick="pickPhotoForm()"><span>📷</span><small>Agregar foto</small></div>`}</div>
+  <input type="hidden" id="pf-ph" value="${p?.photo||''}">
+  <div class="fld-row"><div class="fld"><label>Nombre *</label><input id="pf-fn" placeholder="Carlos" value="${p?.firstName||''}"></div><div class="fld"><label>Apellido</label><input id="pf-ln" placeholder="Mendoza" value="${p?.lastName||''}"></div></div>
+  <div class="fld-row"><div class="fld"><label>Fecha nacimiento</label><input id="pf-bd" type="date" value="${p?.birthDate||''}"></div><div class="fld"><label>Fallecimiento</label><input id="pf-dd" type="date" value="${p?.deathDate||''}"></div></div>
+  <div class="fld-row"><div class="fld"><label>Género</label><select id="pf-gn"><option value="unknown"${(!p||p.gender==='unknown')?' selected':''}>No especificado</option><option value="male"${p?.gender==='male'?' selected':''}>Masculino</option><option value="female"${p?.gender==='female'?' selected':''}>Femenino</option></select></div><div class="fld"><label>Estado</label><select id="pf-st"><option value="unverified"${(!p||p.status==='unverified')?' selected':''}>Sin verificar</option><option value="validated"${p?.status==='validated'?' selected':''}>Validado ✓</option><option value="conflict"${p?.status==='conflict'?' selected':''}>En conflicto</option></select></div></div>
+  <div class="fld"><label>Lugar de origen</label><input id="pf-lo" placeholder="Ciudad, País" value="${p?.location||''}"></div>
+  <div class="fld"><label>Historia o anécdota</label><textarea id="pf-st2" placeholder="Algo especial sobre esta persona…">${p?.story||''}</textarea></div>
+  <button class="sbtn" onclick="${e?`savePerson('${p.id}')`:'addPerson()'}">${e?'Guardar cambios':'+ Agregar a la familia'}</button>
+  ${e?`<button class="sbtn danger" onclick="delPerson('${p.id}')">Eliminar persona</button>`:''}`;}
+
+function pickPhotoForm(){const inp=document.createElement('input');inp.type='file';inp.accept='image/*';inp.onchange=e=>{const f=e.target.files[0];if(!f)return;compressPhoto(f,b64=>{document.getElementById('pf-ph').value=b64;const w=document.querySelector('.form-ph-wrap');if(w)w.innerHTML=`<div class="ph-wrap"><img class="ph-img" src="${b64}"><button class="ph-edit-btn" onclick="pickPhotoForm()">✎</button></div>`;});};inp.click();}
+function _doAddPerson(){
+  const fn=document.getElementById('pf-fn')?.value?.trim();
+  if(!fn)return;
+  const p={id:uid(),firstName:fn,lastName:document.getElementById('pf-ln')?.value?.trim()||'',gender:document.getElementById('pf-gn')?.value||'unknown',birthDate:document.getElementById('pf-bd')?.value||'',deathDate:document.getElementById('pf-dd')?.value||'',location:document.getElementById('pf-lo')?.value?.trim()||'',story:document.getElementById('pf-st2')?.value?.trim()||'',photo:document.getElementById('pf-ph')?.value||null,status:document.getElementById('pf-st')?.value||'unverified',notes:''};
+  persons.push(p);save();updateGraph();closePanel();addActivity(p.firstName,'se unió al árbol');setTimeout(()=>{showMagicMoment(p,null);},400);}
+
+function addPerson(){
+  const fn=document.getElementById('pf-fn')?.value?.trim();
+  if(!fn){toast('El nombre es obligatorio','err');return;}
+  const dupes=findDuplicates(fn,document.getElementById('pf-ln')?.value?.trim(),document.getElementById('pf-bd')?.value);
+  if(dupes.length){
+    const names=dupes.map(d=>fullName(d)).join(', ');
+    showConfirm(
+      'Posible persona duplicada',
+      `Ya existe <strong>${names}</strong> en el árbol.<br><br>¿Esta es una persona diferente?`,
+      '_doAddPerson',null,'Sí, es diferente','Cancelar');
+    return;}
+  _doAddPerson();}
+function savePerson(id){const fn=document.getElementById('pf-fn')?.value?.trim();if(!fn){toast('Nombre obligatorio','err');return;}const idx=persons.findIndex(p=>p.id===id);if(idx<0)return;persons[idx]={...persons[idx],firstName:fn,lastName:document.getElementById('pf-ln')?.value?.trim()||'',gender:document.getElementById('pf-gn')?.value||'unknown',birthDate:document.getElementById('pf-bd')?.value||'',deathDate:document.getElementById('pf-dd')?.value||'',location:document.getElementById('pf-lo')?.value?.trim()||'',story:document.getElementById('pf-st2')?.value?.trim()||'',photo:document.getElementById('pf-ph')?.value||persons[idx].photo||null,status:document.getElementById('pf-st')?.value||'unverified'};save();updateGraph();showProfile(persons[idx]);toast('Guardado ✓');}
+function delPerson(id){
+  const p=persons.find(x=>x.id===id);
+  showConfirm(
+    'Eliminar persona',
+    `¿Eliminar a <strong>${p?fullName(p):'esta persona'}</strong>? También se borran todos sus vínculos.`,
+    `function(){persons=persons.filter(x=>x.id!=='${id}');relations=relations.filter(r=>r.source!=='${id}'&&r.target!=='${id}');save();selectedId=null;closePanel();updateGraph();toast('Eliminado');}`,
+    null,'Eliminar','Cancelar','danger');}
+
+// ── Relation form ──
+function relFormHTML(){const opts=persons.map(p=>`<option value="${p.id}">${fullName(p)}</option>`).join('');
+  const relList=relations.slice().reverse().slice(0,12).map(r=>{
+    const pa=persons.find(x=>x.id===r.source),pb=persons.find(x=>x.id===r.target);
+    if(!pa||!pb)return'';
+    const tl={parent:'→ Padre/Madre',partner:'↔ Pareja',adopted:'→ Adoptivo'};
+    return`<div style="display:flex;align-items:center;justify-content:space-between;padding:6px 8px;background:#f9f5f0;border-radius:7px;margin-bottom:4px;border:1px solid #e8ddd0;font-size:12px;gap:8px">
+      <span style="color:#78563a;flex:1;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${fullName(pa)} <span style="color:#c4a882">${tl[r.type]||r.type}</span> ${fullName(pb)}</span>
+      <button onclick="deleteRel('${r.id}')" title="Eliminar" style="background:none;border:none;color:#d4c5b0;cursor:pointer;font-size:16px;flex-shrink:0;padding:0 2px;border-radius:4px;transition:color .1s" onmouseover="this.style.color='#ef4444'" onmouseout="this.style.color='#d4c5b0'">×</button>
+    </div>`;}).join('');
+  return`
+  <div class="pn-head"><div class="pn-title">Vínculos</div><button class="xb" onclick="closePanel()">×</button></div>
+  <div class="fld"><label>Persona A</label><select id="ra" onchange="prevRel()"><option value="">Seleccionar…</option>${opts}</select></div>
+  <div class="fld"><label>Tipo</label><select id="rt" onchange="prevRel()"><option value="parent">Es padre/madre de →</option><option value="partner">Es pareja de ↔</option><option value="adopted">Es padre adoptivo de →</option></select></div>
+  <div class="fld"><label>Persona B</label><select id="rb" onchange="prevRel()"><option value="">Seleccionar…</option>${opts}</select></div>
+  <div id="rpv"></div>
+  <button class="sbtn" onclick="addRel()">Crear vínculo</button>
+  ${relList?`<div class="conn-hd" style="margin-top:16px">Vínculos recientes — toca × para eliminar</div>${relList}`:''}
+  `;}
+function prevRel(){const a=document.getElementById('ra')?.value,b=document.getElementById('rb')?.value,t=document.getElementById('rt')?.value,el=document.getElementById('rpv');if(!el)return;if(a&&b&&a!==b){const pa=persons.find(p=>p.id===a),pb=persons.find(p=>p.id===b);const tl={parent:'es padre/madre de',partner:'es pareja de',adopted:'es padre adoptivo de'};el.innerHTML=`<div class="rel-prev">${fullName(pa)} <strong>${tl[t]||t}</strong> ${fullName(pb)}</div>`}else el.innerHTML='';}
+function addRel(){const s=document.getElementById('ra')?.value,t=document.getElementById('rb')?.value,type=document.getElementById('rt')?.value;if(!s||!t){toast('Selecciona ambas personas','err');return;}if(s===t){toast('No puedes conectar a alguien consigo mismo','err');return;}if(isDupe(s,t)){toast('Este vínculo ya existe','err');return;}if(['parent','adopted'].includes(type)&&wouldCycle(relations,s,t)){toast('Ciclo genealógico imposible','err');return;}relations.push({id:uid(),source:s,target:t,type});save();updateGraph();closePanel();toast('Vínculo creado ✓');}
+
+// ── Add Relative contextual ──
+let _arCtx=null;
+function addRelativeOf(pid,type){const p=persons.find(x=>x.id===pid);if(!p)return;const CFG={father:{emoji:'👨',title:`Padre de ${p.firstName}`,gender:'male',relType:'parent',isParent:true},mother:{emoji:'👩',title:`Madre de ${p.firstName}`,gender:'female',relType:'parent',isParent:true},child:{emoji:'🧒',title:`Hijo/a de ${p.firstName}`,gender:'unknown',relType:'parent',isParent:false},partner:{emoji:'💑',title:`Pareja de ${p.firstName}`,gender:'unknown',relType:'partner',isParent:null}};const cfg=CFG[type];if(!cfg)return;_arCtx={pid,type,cfg};document.getElementById('pnl-in').innerHTML=`<button class="back-btn" onclick="showProfile(persons.find(x=>x.id==='${pid}'))">← Volver a ${p.firstName}</button><div class="pn-head"><div class="pn-title">${cfg.emoji} ${cfg.title}</div></div><div class="ar-ctx">Se conectará automáticamente a <strong>${p.firstName}</strong></div><div class="form-ph-wrap"><div class="ph-empty" onclick="pickPhotoAR()"><span>📷</span><small>Agregar foto</small></div></div><input type="hidden" id="ar-ph" value=""><div class="fld-row"><div class="fld"><label>Nombre *</label><input id="ar-fn" placeholder="Carlos"></div><div class="fld"><label>Apellido</label><input id="ar-ln" placeholder="Mendoza"></div></div><div class="fld-row"><div class="fld"><label>Fecha nacimiento</label><input id="ar-bd" type="date"></div><div class="fld"><label>Género</label><select id="ar-gn"><option value="unknown"${cfg.gender==='unknown'?' selected':''}>No especificado</option><option value="male"${cfg.gender==='male'?' selected':''}>Masculino</option><option value="female"${cfg.gender==='female'?' selected':''}>Femenino</option></select></div></div><div class="fld"><label>Lugar de origen</label><input id="ar-lo" placeholder="Ciudad, País"></div><div class="fld"><label>Historia</label><textarea id="ar-st" placeholder="Algo especial sobre esta persona…"></textarea></div><button class="sbtn" onclick="submitAR()">✓ Agregar a la familia →</button>`;document.getElementById('panel').classList.add('open');setTimeout(()=>document.getElementById('ar-fn')?.focus(),60);}
+function pickPhotoAR(){const inp=document.createElement('input');inp.type='file';inp.accept='image/*';inp.onchange=e=>{const f=e.target.files[0];if(!f)return;compressPhoto(f,b64=>{document.getElementById('ar-ph').value=b64;const w=document.querySelector('.form-ph-wrap');if(w)w.innerHTML=`<div class="ph-wrap"><img class="ph-img" src="${b64}"><button class="ph-edit-btn" onclick="pickPhotoAR()">✎</button></div>`;});};inp.click();}
+function submitAR(){if(!_arCtx)return;const{pid,type,cfg}=_arCtx;const fn=document.getElementById('ar-fn')?.value?.trim();if(!fn){toast('El nombre es obligatorio','err');return;}const np={id:uid(),firstName:fn,lastName:document.getElementById('ar-ln')?.value?.trim()||'',gender:document.getElementById('ar-gn')?.value||cfg.gender,birthDate:document.getElementById('ar-bd')?.value||'',deathDate:'',location:document.getElementById('ar-lo')?.value?.trim()||'',story:document.getElementById('ar-st')?.value?.trim()||'',photo:document.getElementById('ar-ph')?.value||null,status:'unverified',notes:''};persons.push(np);if(cfg.relType==='partner'){relations.push({id:uid(),source:pid,target:np.id,type:'partner'});}else if(cfg.isParent){relations.push({id:uid(),source:np.id,target:pid,type:'parent'});}else{relations.push({id:uid(),source:pid,target:np.id,type:'parent'});}save();updateGraph();_arCtx=null;const orig=persons.find(x=>x.id===pid);if(orig)showProfile(orig);addActivity(fn,'se unió al árbol');setTimeout(()=>{showMagicMoment(np,pid);},350);}
+
+// ── PDF (Línea directa vs colateral) ──
+// ══════ LINEAGE DETECTION ══════
+// Correct algorithm:
+// - Blood lineage traced ONLY through parent/adopted links
+// - Go UP to find ancestors, go DOWN (excluding 'me') to find cousins/nephews
+// - Partners of blood relatives = political relatives (no blood)
+
+function getAncestors(startId){
+  // Only go UP the tree (child→parent direction)
+  if(!startId)return new Set();
+  const v=new Set([startId]);const q=[startId];
+  while(q.length){const cur=q.shift();
+    for(const r of relations){
+      if(r.type!=='parent'&&r.type!=='adopted')continue;
+      if(r.target===cur&&!v.has(r.source)){v.add(r.source);q.push(r.source);}
+    }}
+  return v;}
+
+function getDescendants(startId, excludeId){
+  // Only go DOWN the tree (parent→child direction), skip excludeId branch
+  if(!startId)return new Set();
+  const v=new Set([startId]);const q=[startId];
+  while(q.length){const cur=q.shift();
+    for(const r of relations){
+      if(r.type!=='parent'&&r.type!=='adopted')continue;
+      if(r.source===cur&&r.target!==excludeId&&!v.has(r.target)){v.add(r.target);q.push(r.target);}
+    }}
+  return v;}
+
+function isPartnerOf(pid,bloodSet){
+  for(const r of relations){
+    if(r.type!=='partner')continue;
+    const other=r.source===pid?r.target:r.target===pid?r.source:null;
+    if(other&&bloodSet.has(other))return true;
+  }
+  return false;}
+
+function getLineage(pid){
+  const meId=viewerId;
+  if(pid===meId)return'me';
+
+  const meParents=relations
+    .filter(r=>(r.type==='parent'||r.type==='adopted')&&r.target===meId)
+    .map(r=>r.source);
+  const dadId=meParents.find(id=>persons.find(x=>x.id===id)?.gender==='male')
+    ||(meParents.length===1?meParents[0]:null);
+  const momId=meParents.find(id=>persons.find(x=>x.id===id)?.gender==='female');
+
+  if(pid===dadId)return'paternal';
+  if(pid===momId)return'maternal';
+
+  // Step 1: ancestors of each side
+  const dadAnc=getAncestors(dadId); // dad + his parents + grandparents...
+  const momAnc=getAncestors(momId);
+
+  // Step 2: descendants of each side (excluding 'me' so we don't cross to other side)
+  const dadDesc=getDescendants(dadId, meId); // dad's children (Juan Carlos etc) excluding me's branch
+  const momDesc=getDescendants(momId, meId);
+
+  // Step 3: pid's own ancestors
+  const pidAnc=getAncestors(pid);
+
+  // Is pid an ancestor of dad's side?
+  const pidIsDadAnc=dadAnc.has(pid);
+  // Is pid an ancestor of mom's side?
+  const pidIsMomAnc=momAnc.has(pid);
+
+  // Does pid share ancestors with dad's line (uncle, cousin etc through dad)?
+  // pid's ancestors ∩ dad's ancestors (excluding 'me','dadId','momId' themselves)
+  let sharesDad=pidIsDadAnc, sharesMom=pidIsMomAnc;
+  if(!sharesDad&&dadId){
+    for(const a of pidAnc){
+      if(a!==meId&&a!==momId&&dadAnc.has(a)){sharesDad=true;break;}
+    }}
+  if(!sharesMom&&momId){
+    for(const a of pidAnc){
+      if(a!==meId&&a!==dadId&&momAnc.has(a)){sharesMom=true;break;}
+    }}
+
+  // Is pid a descendant of dad (but not through 'me')?
+  if(!sharesDad)sharesDad=dadDesc.has(pid);
+  if(!sharesMom)sharesMom=momDesc.has(pid);
+
+  if(sharesDad&&sharesMom)return'both';
+  if(sharesDad)return'paternal';
+  if(sharesMom)return'maternal';
+
+  // Step 4: political relatives (partners of blood relatives)
+  const allDadBlood=new Set([...(dadId?[dadId]:[]),...dadAnc,...dadDesc]);
+  const allMomBlood=new Set([...(momId?[momId]:[]),...momAnc,...momDesc]);
+  // Also add me and me's descendants
+  const meDesc=getDescendants(meId,null);
+  meDesc.forEach(id=>{allDadBlood.add(id);allMomBlood.add(id);});
+
+  const polDad=isPartnerOf(pid,allDadBlood);
+  const polMom=isPartnerOf(pid,allMomBlood);
+
+  if(polDad&&polMom)return'political_both';
+  if(polDad)return'political_paternal';
+  if(polMom)return'political_maternal';
+  // Partner of me directly
+  if(isPartnerOf(pid,new Set([meId])))return'political_direct';
+
+  return'unknown';}
+
+function lineageLabel(pid){
+  const l=getLineage(pid);
+  if(l==='paternal')return' · línea paterna';
+  if(l==='maternal')return' · línea materna';
+  if(l==='both')return' · ambas líneas';
+  if(l==='political_paternal')return' · pariente político (línea paterna)';
+  if(l==='political_maternal')return' · pariente político (línea materna)';
+  if(l==='political_both'||l==='political_direct')return' · pariente político';
+  return'';}
+
+function lineageGroupKey(pid){
+  const l=getLineage(pid);
+  if(l==='paternal')return'paternal';
+  if(l==='maternal')return'maternal';
+  if(l==='both')return'both';
+  if(l?.startsWith('political'))return'political';
+  return'unknown';}
+
+function openPDF(){
+  const gm=computeGens();
+  // Build lineage from "me"
+  const meId='me';
+  // Direct line: me → parents → grandparents → great-grandparents → children → grandchildren → great-grandchildren
+  const directIds=new Set([meId]);
+  function addAncestors(pid,depth){if(depth<=0)return;getParents(pid).forEach(pp=>{directIds.add(pp.id);addAncestors(pp.id,depth-1);});}
+  function addDescendants(pid,depth){if(depth<=0)return;getChildren(pid).forEach(c=>{directIds.add(c.id);addDescendants(c.id,depth-1);});}
+  addAncestors(meId,3);addDescendants(meId,3);
+  // Partners of direct line people are also direct context
+  const partnerIds=new Set();
+  relations.filter(r=>r.type==='partner').forEach(r=>{if(directIds.has(r.source))partnerIds.add(r.target);if(directIds.has(r.target))partnerIds.add(r.source);});
+  partnerIds.forEach(id=>directIds.add(id));
+  const collateralIds=new Set(persons.filter(p=>!directIds.has(p.id)).map(p=>p.id));
+  const directP=persons.filter(p=>directIds.has(p.id));
+  const collateralP=persons.filter(p=>collateralIds.has(p.id));
+  function sortByGen(arr){return arr.slice().sort((a,b)=>(gm.get(a.id)??0)-(gm.get(b.id)??0));}
+  function cardHTML(p){const ns=nStyle(p);const by=birthYear(p),dy=p.deathDate?p.deathDate.slice(0,4):null;const rel=p.id!==viewerId?findRel(viewerId,p.id):null;
+    const lineage=p.id!==meId?lineageLabel(p.id):'';
+    return`<div style="background:#fff;border:1.5px solid #e2e8f0;border-radius:10px;padding:11px;display:flex;align-items:flex-start;gap:10px;width:210px;page-break-inside:avoid;border-top:3px solid ${ns.border}">${p.photo?`<img style="width:42px;height:42px;border-radius:50%;object-fit:cover;flex-shrink:0;border:1.5px solid ${ns.border}" src="${p.photo}">`:`<div style="width:42px;height:42px;border-radius:50%;background:${ns.fill};border:2px solid ${ns.border};display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:700;color:${ns.text};flex-shrink:0">${initials(p)}</div>`}<div style="min-width:0"><div style="font-size:12.5px;font-weight:600;color:#0f172a;font-family:Georgia,serif;line-height:1.2;word-break:break-word">${fullName(p)}</div>${by?`<div style="font-size:10px;color:#94a3b8;margin-top:2px">n.${by}${dy?` · †${dy}`:''}</div>`:''}${p.location?`<div style="font-size:10px;color:#94a3b8">📍${p.location}</div>`:''}${rel?`<div style="font-size:10px;color:${ns.border};margin-top:3px;font-weight:500">${rel}${lineage}</div>`:''}${!rel&&lineage?`<div style="font-size:10px;color:#94a3b8;margin-top:3px">${lineage.replace(' · ','')}</div>`:''}${p.story?`<div style="font-size:10px;color:#64748b;margin-top:4px;font-style:italic;line-height:1.4">"${p.story.slice(0,70)}${p.story.length>70?'…':''}"</div>`:''}
+  </div></div>`;}
+  // Group direct by generation
+  const byGen=new Map();sortByGen(directP).forEach(p=>{const g=gm.get(p.id)??0;(byGen.get(g)||(byGen.set(g,[]),byGen.get(g))).push(p);});
+  const genRows=[...byGen.keys()].sort((a,b)=>a-b).map(g=>{const lbl=GL[String(g)]||(g>0?`Generación +${g}`:`Generación ${g}`);return`<div style="margin-bottom:24px"><div style="font-size:9px;text-transform:uppercase;letter-spacing:.12em;color:#94a3b8;margin-bottom:9px;padding-bottom:5px;border-bottom:1px solid #e2e8f0">${lbl}</div><div style="display:flex;flex-wrap:wrap;gap:10px">${byGen.get(g).map(cardHTML).join('')}</div></div>`;}).join('');
+  // Group collateral by lineage
+  const collByLineage={paternal:[],maternal:[],both:[],political:[],unknown:[]};
+  collateralP.forEach(p=>{
+    const key=lineageGroupKey(p.id);
+    (collByLineage[key]=collByLineage[key]||[]).push(p);
+  });
+  function collSection(title,subtitle,arr){
+    if(!arr.length)return'';
+    return`<div style="margin-bottom:18px">
+      <div style="font-size:9px;text-transform:uppercase;letter-spacing:.1em;color:#94a3b8;margin-bottom:3px;padding-bottom:4px;border-bottom:1px dashed #e2e8f0">${title} (${arr.length})</div>
+      ${subtitle?`<div style="font-size:10px;color:#cbd5e1;margin-bottom:8px;font-style:italic">${subtitle}</div>`:''}
+      <div style="display:flex;flex-wrap:wrap;gap:10px">${sortByGen(arr).map(cardHTML).join('')}</div>
+    </div>`;
+  }
+  const collRows=collateralP.length?`<div style="margin-bottom:8px">
+    <h2 style="font-family:'Playfair Display',serif;font-size:18px;color:#0f172a;margin-bottom:6px;font-weight:500">🌿 Línea colateral (${collateralP.length} personas)</h2>
+    <p style="font-size:11px;color:#94a3b8;margin-bottom:16px">Organizados por línea sanguínea · Los parientes políticos son familiares por matrimonio, sin vínculo de sangre directo</p>
+    ${collSection('Línea paterna','Tíos/as, hermanos/as, primos/as y sobrinos/as por parte de tu padre',collByLineage.paternal)}
+    ${collSection('Línea materna','Tíos/as, hermanos/as, primos/as y sobrinos/as por parte de tu madre',collByLineage.maternal)}
+    ${collSection('Ambas líneas','Parientes presentes en ambas ramas familiares',collByLineage.both)}
+    ${collSection('Parientes políticos','Cuñados/as y parejas de familiares — sin vínculo de sangre directo',collByLineage.political)}
+    ${collSection('Sin clasificar','Sin suficiente información para determinar la línea',collByLineage.unknown)}
+  </div>`:'';
+  const _unused=collateralP.length?`<div style="margin-bottom:24px"><div style="font-size:9px;text-transform:uppercase;letter-spacing:.12em;color:#94a3b8;margin-bottom:9px;padding-bottom:5px;border-bottom:1px solid #e2e8f0">Línea colateral (tíos/as, hermanos/as, primos/as, cuñados/as, sobrinos/as)</div><div style="display:flex;flex-wrap:wrap;gap:10px">${sortByGen(collateralP).map(cardHTML).join('')}</div></div>`:'';
+  const pw=window.open('','_blank','width=1200,height=900');
+  pw.document.write(`<!DOCTYPE html><html lang="es"><head><meta charset="utf-8"><title>Raíces — Mi Familia</title><link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600&family=DM+Sans:opsz,wght@9..40,400;9..40,500&display=swap" rel="stylesheet"><style>*{box-sizing:border-box;margin:0;padding:0}body{font-family:'DM Sans',sans-serif;background:#f8fafc;padding:28px;color:#1e293b}@media print{body{background:#fff;padding:15px}@page{margin:1cm}}</style></head><body>
+  <div style="display:flex;align-items:center;gap:12px;margin-bottom:6px"><div style="width:36px;height:36px;background:linear-gradient(135deg,#22c55e,#16a34a);border-radius:50% 50% 50% 10%;display:flex;align-items:center;justify-content:center;font-size:18px">🌿</div><div><div style="font-family:'Playfair Display',serif;font-size:26px;color:#0f172a;font-weight:600">Raíces</div><div style="font-size:12px;color:#94a3b8">Una vista clara de cómo estás conectado · ${new Date().toLocaleDateString('es-CL',{year:'numeric',month:'long',day:'numeric'})}</div></div></div>
+  <div style="display:flex;gap:12px;margin:16px 0 24px;flex-wrap:wrap">
+    <div style="background:#fff;border:1px solid #e2e8f0;border-radius:8px;padding:10px 16px;text-align:center"><div style="font-size:20px;font-weight:600;color:#0f172a">${persons.length}</div><div style="font-size:10px;color:#94a3b8">personas</div></div>
+    <div style="background:#fff;border:1px solid #e2e8f0;border-radius:8px;padding:10px 16px;text-align:center"><div style="font-size:20px;font-weight:600;color:#0f172a">${numGens()}</div><div style="font-size:10px;color:#94a3b8">generaciones</div></div>
+    <div style="background:#fff;border:1px solid #e2e8f0;border-radius:8px;padding:10px 16px;text-align:center"><div style="font-size:20px;font-weight:600;color:#0f172a">${persons.filter(p=>p.photo).length}</div><div style="font-size:10px;color:#94a3b8">fotos</div></div>
+  </div>
+  <div style="font-size:10px;background:#f0fdf4;border:1px solid #bbf7d0;border-radius:6px;padding:8px 12px;color:#166534;margin-bottom:22px">Línea directa: ascendientes y descendientes directos más sus parejas · Línea colateral: tíos/as, hermanos/as, primos/as, cuñados/as y sobrinos/as</div>
+  <h2 style="font-family:'Playfair Display',serif;font-size:18px;color:#0f172a;margin-bottom:8px;font-weight:500">📍 Línea directa (${directP.length} personas)</h2>
+  <p style="font-size:11px;color:#94a3b8;margin-bottom:16px">Ascendientes y descendientes directos: abuelos, padres, hijos, nietos y sus parejas</p>
+  ${genRows}
+  ${collRows}
+  <div style="text-align:center;margin-top:28px;font-size:10px;color:#cbd5e1;border-top:1px solid #e2e8f0;padding-top:14px">Raíces · La red viva de tu familia · raices.app</div>
+  </body></html>`);
+  pw.document.write('<scr'+'ipt>setTimeout(()=>window.print(),700)</scr'+'ipt>');
+  pw.document.close();}
+
+// ── Export / Import ──
+function exportData(){const data=JSON.stringify({persons,relations,exportedAt:new Date().toISOString()},null,2);const blob=new Blob([data],{type:'application/json'});const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='raices-familia.json';a.click();toast('Exportado ✓','info');}
+function importData(ev){const f=ev.target.files[0];if(!f)return;const reader=new FileReader();reader.onload=e=>{try{const d=JSON.parse(e.target.result);if(!d.persons||!d.relations)throw new Error();persons=d.persons;relations=d.relations;try{localStorage.setItem(SK,JSON.stringify({persons,relations}))}catch(e){}d3Nodes=[];initGraph();toast(`${persons.length} personas importadas ✓`,'info');}catch{toast('Archivo no válido','err');}};reader.readAsText(f);ev.target.value='';}
+
+// ══════ SHARE / INVITE ══════
+function openShare(){
+  const cfg=localStorage.getItem(FB_KEY);
+  const el=document.getElementById('sh-content');
+  const waBtn=document.getElementById('sh-wa');
+  if(!el)return;
+
+  if(cfg){
+    // Firebase connected — generate link with encoded config
+    const encoded=btoa(cfg).replace(/=/g,'');
+    const baseUrl=window.location.href.split('?')[0].split('#')[0];
+    const link=`${baseUrl}#join=${encoded}`;
+    el.innerHTML=`
+      <div class="sh-step"><div class="sh-n">✓</div><div class="sh-bd">
+        <strong>Tu árbol está en la nube</strong>
+        <span>Cualquier persona que abra este link verá y podrá editar el árbol en tiempo real.</span>
+      </div></div>
+      <div class="sh-link-box" onclick="copyShareLink(this,'${link.replace(/'/g,"\'")}')">
+        ${link.length>60?link.slice(0,60)+'…':link}
+        <span class="sh-link-copied" id="sh-copied">¡Copiado!</span>
+      </div>
+      <div style="font-size:11px;color:#a8906c;text-align:center">Toca el link para copiarlo</div>`;
+    if(waBtn){waBtn.onclick=()=>shareWhatsApp(link);}
+  } else {
+    // No Firebase — offer export + instructions
+    el.innerHTML=`
+      <div class="sh-step"><div class="sh-n">1</div><div class="sh-bd">
+        <strong>Conecta Firebase primero</strong>
+        <span>Para compartir en tiempo real, necesitas activar Firebase. Es gratis.</span>
+      </div></div>
+      <div class="sh-step"><div class="sh-n">2</div><div class="sh-bd">
+        <strong>O comparte una copia del archivo</strong>
+        <span>Descarga el archivo y mándalo por WhatsApp. Tu familia puede abrirlo en el navegador.</span>
+      </div></div>
+      <div style="display:flex;gap:8px;margin-top:10px">
+        <button class="sh-btn pri" onclick="closeShare();openFbModal()">🔥 Activar Firebase</button>
+        <button class="sh-btn" onclick="exportDataAndClose()">⬇ Descargar archivo</button>
+      </div>`;
+    if(waBtn)waBtn.style.display='none';
+  }
+  document.getElementById('share-modal').classList.add('open');}
+
+function copyShareLink(el,link){
+  navigator.clipboard.writeText(link).catch(()=>{
+    const ta=document.createElement('textarea');ta.value=link;document.body.appendChild(ta);ta.select();document.execCommand('copy');document.body.removeChild(ta);
+  });
+  const copied=document.getElementById('sh-copied');
+  if(copied){copied.classList.add('show');setTimeout(()=>copied.classList.remove('show'),2000);}
+  toast('Link copiado ✓','ok');}
+
+function shareWhatsApp(link){
+  const text=encodeURIComponent(`🌿 *Raíces — La red viva de nuestra familia*
+
+Te invito a explorar y completar nuestro árbol familiar. Puedes ver tus conexiones, agregar personas y subir fotos.
+
+👉 ${link||window.location.href}`);
+  window.open(`https://wa.me/?text=${text}`,'_blank');}
+
+function exportDataAndClose(){closeShare();exportData();}
+function closeShare(){document.getElementById('share-modal').classList.remove('open');}
+
+// Auto-join from URL hash
+(function checkJoinLink(){
+  const hash=window.location.hash;
+  if(!hash.startsWith('#join='))return;
+  const encoded=hash.slice(6);
+  try{
+    const raw=atob(encoded.replace(/-/g,'+').replace(/_/g,'/'));
+    const cfg=JSON.parse(raw.replace(/([{,]\s*)([a-zA-Z]+)\s*:/g,'$1"$2":'));
+    if(cfg?.apiKey&&cfg?.projectId){
+      localStorage.setItem(FB_KEY,raw);
+      toast('🔗 Conectando al árbol familiar…','info');
+      setTimeout(()=>initFirebase(raw),800);
+      // Clean URL
+      history.replaceState(null,'',window.location.pathname);}}catch(e){}})();
+
+// ── Firebase ──
+const FB_KEY='raices_firebase';
+let _fbRef=null,_fbSetDoc=null,_unsubscribe=null;
+function openFbModal(){const s=localStorage.getItem(FB_KEY);if(s)document.getElementById('fb-cfg-txt').value=s;document.getElementById('fb-modal').classList.add('open');}
+function closeFbModal(){document.getElementById('fb-modal').classList.remove('open');}
+function normCfg(raw){try{const cleaned=raw.trim().replace(/\/\/.*/g,'').replace(/,\s*}/g,'}').replace(/([{,]\s*)([a-zA-Z]+)\s*:/g,'$1"$2":');return JSON.parse(cleaned);}catch(e){return null;}}
+async function connectFirebase(){const raw=document.getElementById('fb-cfg-txt')?.value?.trim();if(!raw){toast('Pega el objeto firebaseConfig primero','err');return;}const cfg=normCfg(raw);if(!cfg?.apiKey||!cfg?.projectId){toast('Formato incorrecto — copia el objeto { ... } completo','err');return;}localStorage.setItem(FB_KEY,raw);closeFbModal();await initFirebase(cfg);}
+async function initFirebase(cfgRaw){
+  const cfg=typeof cfgRaw==='string'?normCfg(cfgRaw):cfgRaw;if(!cfg)return;
+  setSyncStatus('busy','Conectando…');
+  try{
+    const{initializeApp,getApps}=await import('https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js');
+    const{getFirestore,doc,setDoc,onSnapshot,getDoc}=await import('https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js');
+    const apps=getApps();const app=apps.length?apps[0]:initializeApp(cfg);
+    const db=getFirestore(app);_fbSetDoc=setDoc;
+    const ref=doc(db,'raices','data');_fbRef=ref;
+    const snap=await getDoc(ref);
+    if(!snap.exists()||!snap.data()?.persons?.length){await setDoc(ref,{persons,relations,updatedAt:new Date().toISOString()});toast('🔥 Árbol subido — ¡ya pueden conectarse!','info');}
+    else{const d=snap.data();persons=d.persons;relations=d.relations;try{localStorage.setItem(SK,JSON.stringify({persons,relations}))}catch(e){}d3Nodes=[];updateGraph();toast(`🔥 Conectado · ${persons.length} personas`,'info');}
+    if(_unsubscribe)_unsubscribe();
+    _unsubscribe=onSnapshot(ref,snap=>{if(!snap.exists())return;const d=snap.data();if(d.updatedAt===window._lastPush)return;persons=d.persons;relations=d.relations;try{localStorage.setItem(SK,JSON.stringify({persons,relations}))}catch(e){}d3Nodes=[];updateGraph();setSyncStatus('ok',`En vivo · ${new Date().toLocaleTimeString('es',{hour:'2-digit',minute:'2-digit'})}`);addActivity('La familia','actualizó el árbol');});
+    setSyncStatus('ok','En vivo 🔥');
+  }catch(e){console.error(e);setSyncStatus('err','Error al conectar');toast('Error — verifica el firebaseConfig','err');}}
+async function pushToFirebase(){if(!_fbRef||!_fbSetDoc)return;try{const ts=new Date().toISOString();window._lastPush=ts;await _fbSetDoc(_fbRef,{persons,relations,updatedAt:ts});setSyncStatus('ok',`Guardado · ${new Date().toLocaleTimeString('es',{hour:'2-digit',minute:'2-digit'})}`)}catch(e){setSyncStatus('err','Error al guardar');}}
+
+// ── Resize ──
+window.addEventListener('resize',()=>{
+  const el=svgEl;
+  d3.select(el).attr('width',el.parentElement.clientWidth).attr('height',el.parentElement.clientHeight);
+  if(layoutMode==='tree'){
+    setTimeout(applyTreeLayout,50);
+  } else {
+    sim?.force('center',d3.forceCenter(el.parentElement.clientWidth/2,el.parentElement.clientHeight/2)).alpha(.2).restart();
+  }
+  adjustBodyTop();});
+
+// ── Init ──
+load();
+// Load viewer identity (who is viewing from this browser)
+try{
+  const sv=localStorage.getItem(VK);
+  if(sv&&persons.find(p=>p.id===sv))viewerId=sv;
+  else viewerId=persons.find(p=>p.id==='me')?'me':(persons[0]?.id||'me');
+}catch(e){}
+// Apply hoy collapsed state
+if(_hoyCollapsed){
+  document.getElementById('hoy-wrap')?.classList.add('collapsed');
+  document.getElementById('hoy-show-btn')?.classList.add('visible');
+  const btn=document.getElementById('hoy-toggle');
+  if(btn)btn.innerHTML='<svg width="10" height="10" viewBox="0 0 10 6" fill="none"><path d="M1 1l4 4 4-4" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></svg> Mostrar';
+}
+setTimeout(adjustBodyTop,100);
+
+// Show wizard only if truly no data exists (not just raices_seen flag)
+const _hasData=persons.some(p=>p.firstName&&p.firstName!=='Yo'&&!p.firstName.startsWith('Abuelo')&&!p.firstName.startsWith('Abuela'));
+const _seen=!!localStorage.getItem('raices_seen');
+if(!_seen&&!_hasData){
+  document.getElementById('welcome').style.display='flex';
+  wzRender();
+} else {
+  document.getElementById('welcome').style.display='none';
+  // Mark as seen so wizard doesn't show again
+  try{localStorage.setItem('raices_seen','1')}catch(e){}
+}
+initGraph();
+const _fbStored=localStorage.getItem(FB_KEY);
+if(_fbStored)setTimeout(()=>initFirebase(_fbStored),700);
+else setSyncStatus('','Sin conectar');
+window.persons=persons;window.relations=relations;window.showProfile=showProfile;window.openPanel=openPanel;window.closePanel=closePanel;window.renderHL=renderHL;window.addRelativeOf=addRelativeOf;window.prevRel=prevRel;window.addPerson=addPerson;window.savePerson=savePerson;window.delPerson=delPerson;window.addRel=addRel;window.submitAR=submitAR;window.pickPhotoForm=pickPhotoForm;window.pickPhotoAR=pickPhotoAR;window.openFbModal=openFbModal;window.deleteRel=deleteRel;window.closeFbModal=closeFbModal;window.connectFirebase=connectFirebase;window.showWelcome=showWelcome;window.wzNext=wzNext;window.wzSkip=wzSkip;window.wzFinish=wzFinish;window.hideMagic=hideMagic;window.closeConfirm=closeConfirm;window.toggleHoy=toggleHoy;window._doAddPerson=_doAddPerson;window.openPDF=openPDF;window.exportData=exportData;window.importData=importData;
+
+// ══════ GEDCOM IMPORT ══════
+function importGEDCOM(text){
+  const lines=text.split(/\r?\n/);
+  const indis=new Map(); // @I1@ -> {id, firstName, lastName, gender, birthDate, deathDate}
+  const fams=new Map();  // @F1@ -> {husb, wife, children:[]}
+  let curIndi=null,curFam=null,curTag=null;
+
+  lines.forEach(line=>{
+    const m=line.match(/^(\d+)\s+(\S+)(?:\s+(.*))?$/);
+    if(!m)return;
+    const[,level,tag,val]=[,...m];const lv=+level;
+
+    if(lv===0){
+      curIndi=null;curFam=null;curTag=null;
+      if(tag.startsWith('@')&&val==='INDI'){curIndi={_id:tag,firstName:'',lastName:'',gender:'unknown',birthDate:'',deathDate:''};indis.set(tag,curIndi);}
+      else if(tag.startsWith('@')&&val==='FAM'){curFam={_id:tag,husb:null,wife:null,children:[]};fams.set(tag,curFam);}
+    } else if(curIndi){
+      if(lv===1&&tag==='NAME'&&val){
+        // NAME format: "First /Last/" — parsed with string methods
+        const slashStart=val.indexOf('/'),slashEnd=val.lastIndexOf('/');
+        if(slashStart!==-1&&slashEnd>slashStart){
+          curIndi.lastName=val.slice(slashStart+1,slashEnd).trim();
+          curIndi.firstName=(val.slice(0,slashStart)+val.slice(slashEnd+1)).replace(/\s+/g,' ').trim();
+        } else {
+          const parts=val.trim().split(/\s+/);
+          curIndi.firstName=parts[0]||'';
+          curIndi.lastName=parts.slice(1).join(' ');}
+      }
+      if(lv===1&&tag==='SEX')curIndi.gender=val==='M'?'male':val==='F'?'female':'unknown';
+      if(lv===1&&(tag==='BIRT'||tag==='DEAT'))curTag=tag;
+      if(lv===2&&tag==='DATE'&&curTag){
+        const yr=val?.match(/(\d{4})/)?.[1];
+        if(yr){if(curTag==='BIRT')curIndi.birthDate=yr+'-01-01';else curIndi.deathDate=yr+'-01-01';}
+      }
+      if(lv===2)curTag=null;
+    } else if(curFam){
+      if(lv===1&&tag==='HUSB')curFam.husb=val?.trim();
+      if(lv===1&&tag==='WIFE')curFam.wife=val?.trim();
+      if(lv===1&&tag==='CHIL')curFam.children.push(val?.trim());
+    }
+  });
+
+  if(!indis.size){toast('No se encontraron personas en el archivo GEDCOM','err');return;}
+
+  // Convert to app format
+  const idMap=new Map(); // @I1@ -> app uid
+  const newPersons=[];const newRels=[];
+
+  indis.forEach((indi,gedId)=>{
+    const appId=uid();idMap.set(gedId,appId);
+    newPersons.push({id:appId,firstName:indi.firstName||'Sin nombre',
+      lastName:indi.lastName||'',gender:indi.gender,
+      birthDate:indi.birthDate||'',deathDate:indi.deathDate||'',
+      location:'',story:'',photo:null,status:'unverified',notes:`Importado de GEDCOM`});
+  });
+
+  fams.forEach(fam=>{
+    const husbId=fam.husb?idMap.get(fam.husb):null;
+    const wifeId=fam.wife?idMap.get(fam.wife):null;
+    if(husbId&&wifeId)newRels.push({id:uid(),source:husbId,target:wifeId,type:'partner'});
+    fam.children.forEach(childGedId=>{
+      const childId=idMap.get(childGedId);
+      if(childId){
+        if(husbId)newRels.push({id:uid(),source:husbId,target:childId,type:'parent'});
+        if(wifeId)newRels.push({id:uid(),source:wifeId,target:childId,type:'parent'});
+      }
+    });
+  });
+
+  if(!confirm(`GEDCOM: ${newPersons.length} personas encontradas.\n¿Reemplazar árbol actual o agregar a los datos existentes?\n\nAceptar = Reemplazar | Cancelar = Agregar`)){
+    persons=[...persons,...newPersons];relations=[...relations,...newRels];
+  } else {
+    persons=newPersons;relations=newRels;
+  }
+  save();d3Nodes=[];initGraph();
+  toast(`✓ ${newPersons.length} personas importadas desde GEDCOM`,'info');}
+
+function openGEDCOMPicker(){
+  const inp=document.createElement('input');inp.type='file';inp.accept='.ged,.gedcom';
+  inp.onchange=e=>{const f=e.target.files[0];if(!f)return;
+    const r=new FileReader();
+    r.onload=ev=>importGEDCOM(ev.target.result);
+    r.readAsText(f,'utf-8');};inp.click();}
+window.openGEDCOMPicker=openGEDCOMPicker;window.openShare=openShare;window.closeShare=closeShare;window.copyShareLink=copyShareLink;window.shareWhatsApp=shareWhatsApp;window.exportDataAndClose=exportDataAndClose;window.adjustBodyTop=adjustBodyTop;window.setViewer=setViewer;window.updateViewerBadge=updateViewerBadge;window.setLayout=setLayout;window.applyTreeLayout=applyTreeLayout;
+</script>
+</body>
+</html>
