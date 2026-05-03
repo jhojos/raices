@@ -198,6 +198,33 @@ textarea{resize:none;height:72px;line-height:1.5}
 .ar-ctx{background:#f0fdf4;border:1px solid #bbf7d0;border-radius:8px;padding:8px 11px;font-size:12px;color:#166534;margin-bottom:14px}
 
 /* ── LEGEND ── */
+/* ── MOBILE MENU ── */
+#mob-menu{display:none;position:fixed;inset:0;z-index:35;background:rgba(0,0,0,.4);backdrop-filter:blur(4px)}
+#mob-menu.open{display:block}
+#mob-sheet{position:fixed;bottom:0;left:0;right:0;background:#fff;border-radius:18px 18px 0 0;padding:16px;box-shadow:0 -4px 30px rgba(0,0,0,.12);z-index:36}
+#mob-sheet-title{font-size:10px;color:#c4a882;text-transform:uppercase;letter-spacing:.08em;margin-bottom:12px;font-weight:600}
+.mob-item{display:flex;align-items:center;gap:12px;padding:13px 14px;border-radius:10px;cursor:pointer;transition:background .1s;margin-bottom:6px;border:1px solid #f0e8dc}
+.mob-item:hover,.mob-item:active{background:#f9f5f0}
+.mob-item-ico{font-size:18px;width:36px;height:36px;border-radius:9px;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.mob-item-txt{font-size:14px;font-weight:500;color:#1e293b}
+.mob-item-sub{font-size:11px;color:#a8906c;margin-top:1px}
+.mob-close{width:36px;height:4px;background:#e2d5c3;border-radius:2px;margin:0 auto 14px;cursor:pointer}
+@media(max-width:640px){
+  #hd{padding:0 10px}
+  #hd-center{display:none}
+  #hd-right .hb:not(.pri):not(.amber){display:none}
+  #hd-right #sync-pill{display:none}
+  #viewer-badge{display:none!important}
+  #mob-hd-right{display:flex!important}
+  .hb.pri{padding:6px 12px;font-size:12px}
+  .hb.amber{padding:6px 12px;font-size:12px}
+  #logo-nm{font-size:14px}
+}
+@media(min-width:641px){
+  #mob-hd-right{display:none!important}
+}
+#mob-hd-right{display:none;align-items:center;gap:6px}
+#mob-stats{font-size:10px;color:#a8906c;white-space:nowrap}
 #layout-toggle{position:fixed;bottom:14px;right:14px;display:flex;background:rgba(255,252,247,.95);border:1px solid #e2d5c3;border-radius:9px;overflow:hidden;box-shadow:0 2px 10px rgba(0,0,0,.08);z-index:10}
 .lt-btn{border:none;background:transparent;color:#a8906c;padding:7px 13px;font-size:11px;cursor:pointer;font-family:inherit;font-weight:500;transition:all .15s;display:flex;align-items:center;gap:5px}
 .lt-btn:hover{color:#78563a;background:#f5ede0}
@@ -520,6 +547,16 @@ textarea{resize:none;height:72px;line-height:1.5}
   <button class="hb amber" id="btn-rel" onclick="openPanel('rel')">+ Vínculo</button>
   <button class="hb pri" onclick="openPanel('person')">+ Persona</button>
  </div>
+ <!-- MOBILE RIGHT -->
+ <div id="mob-hd-right">
+  <div id="mob-stats"></div>
+  <div id="sync-pill-mob" style="display:flex;align-items:center;gap:4px;padding:3px 8px;border-radius:20px;background:#f0fdf4;border:1px solid #bbf7d0;font-size:10px;color:#166534;cursor:pointer" onclick="openFbModal()">
+   <span id="sync-dot-mob" style="width:6px;height:6px;border-radius:50%;background:#22c55e;flex-shrink:0"></span>
+   <span id="sync-lbl-mob">•••</span>
+  </div>
+  <button class="hb pri" onclick="openPanel('person')" style="padding:6px 12px;font-size:12px">+ Persona</button>
+  <button style="background:none;border:1px solid #e2d5c3;border-radius:8px;padding:6px 9px;cursor:pointer;color:#78563a;font-size:16px;line-height:1" onclick="openMobMenu()">☰</button>
+ </div>
 </div>
 
 <div id="body">
@@ -631,6 +668,38 @@ textarea{resize:none;height:72px;line-height:1.5}
   <div class="fb-btns">
    <button class="fb-btn" onclick="closeFbModal()">Cancelar</button>
    <button class="fb-btn pri" onclick="connectFirebase()">Conectar y activar tiempo real →</button>
+  </div>
+ </div>
+</div>
+
+<!-- MOBILE MENU -->
+<div id="mob-menu" onclick="if(event.target===this)closeMobMenu()">
+ <div id="mob-sheet">
+  <div class="mob-close" onclick="closeMobMenu()"></div>
+  <div id="mob-sheet-title">Menú</div>
+  <div class="mob-item" onclick="closeMobMenu();openPanel('person')">
+   <div class="mob-item-ico" style="background:#f0fdf4;color:#16a34a">➕</div>
+   <div><div class="mob-item-txt">Agregar persona</div><div class="mob-item-sub">Añade un familiar a la red</div></div>
+  </div>
+  <div class="mob-item" onclick="closeMobMenu();openPanel('rel')">
+   <div class="mob-item-ico" style="background:#fff7ed;color:#d97706">🔗</div>
+   <div><div class="mob-item-txt">Crear vínculo</div><div class="mob-item-sub">Conecta dos personas</div></div>
+  </div>
+  <div class="mob-item" onclick="closeMobMenu();openPDF()">
+   <div class="mob-item-ico" style="background:#eff6ff;color:#3b82f6">⬇</div>
+   <div><div class="mob-item-txt">Descargar PDF</div><div class="mob-item-sub">Árbol familiar imprimible</div></div>
+  </div>
+  <div class="mob-item" onclick="closeMobMenu();openShare()">
+   <div class="mob-item-ico" style="background:#f0fdf4;color:#16a34a">🔗</div>
+   <div><div class="mob-item-txt">Invitar familia</div><div class="mob-item-sub">Compartir el link</div></div>
+  </div>
+  <div class="mob-item" onclick="closeMobMenu();openFbModal()">
+   <div class="mob-item-ico" style="background:#fff7ed;color:#f97316">🔥</div>
+   <div><div class="mob-item-txt">Configuración Firebase</div><div class="mob-item-sub" id="mob-sync-lbl">Sin conectar</div></div>
+  </div>
+  <div class="mob-item" onclick="closeMobMenu();showWelcome()">
+   <div class="mob-item-ico" style="background:#f5f3ff;color:#8b5cf6">❓</div>
+   <div><div class="mob-item-txt">Guía de uso</div><div class="mob-item-sub">Cómo usar Raíces</div></div>
   </div>
  </div>
 </div>
@@ -951,10 +1020,19 @@ function updateStats(){
   }
   renderHoy();
   updateViewerBadge();
+  // Sync mobile header
+  const _ms=document.getElementById('mob-stats');
+  if(_ms)_ms.textContent=persons.length+' familiares';
   if(persons.length===0)showEmptyState();
   else d3.select(svgEl).select('#empty-state').remove();}
 
-function setSyncStatus(s,m){const d=document.getElementById('sync-dot'),l=document.getElementById('sync-lbl');if(d)d.className=s;if(l)l.textContent=m;}
+function setSyncStatus(s,m){
+  const d=document.getElementById('sync-dot'),l=document.getElementById('sync-lbl');
+  if(d)d.className=s;if(l)l.textContent=m;
+  // Sync mobile pill
+  const dm=document.getElementById('sync-dot-mob'),lm=document.getElementById('sync-lbl-mob');
+  if(dm)dm.style.background=s==='ok'?'#22c55e':s==='busy'?'#f59e0b':s==='err'?'#ef4444':'#d4c5b0';
+  if(lm)lm.textContent=m;}
 
 // ══════ ONBOARDING WIZARD ══════
 const WZ_STEPS=['me','mom','dad','siblings','grandparents','done'];
@@ -1122,6 +1200,17 @@ function wzFinish(){
 function showIdentityHelper(){
   toast('Abre cualquier perfil y pulsa "Este soy yo" para cambiar tu perspectiva','info');}
 window.showIdentityHelper=showIdentityHelper;
+
+function openMobMenu(){
+  document.getElementById('mob-menu').classList.add('open');
+  // Sync status in menu
+  const lbl=document.getElementById('sync-lbl')?.textContent||'Sin conectar';
+  const el=document.getElementById('mob-sync-lbl');
+  if(el)el.textContent=lbl;}
+function closeMobMenu(){document.getElementById('mob-menu').classList.remove('open');}
+window.openMobMenu=openMobMenu;window.closeMobMenu=closeMobMenu;
+
+// Mobile stats sync — called from within updateStats
 
 function dismissWelcome(){
   document.getElementById('welcome').style.display='none';
