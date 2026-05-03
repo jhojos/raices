@@ -870,14 +870,17 @@ function hideMagic(){const el=document.getElementById('magic-toast');if(el)el.cl
 let _hoyCollapsed=false;
 try{_hoyCollapsed=localStorage.getItem('raices_hoy_collapsed')==='1'}catch(e){}
 
+let _adjusting=false;
 function adjustBodyTop(){
+  if(_adjusting)return;_adjusting=true;
   const hoyWrap=document.getElementById('hoy-wrap');
   const body=document.getElementById('body');
   const panel=document.getElementById('panel');
   const hoyH=(!_hoyCollapsed&&hoyWrap)?hoyWrap.offsetHeight||0:0;
   const totalTop=56+hoyH;
   if(body)body.style.top=totalTop+'px';
-  if(panel)panel.style.top=totalTop+'px';}
+  if(panel)panel.style.top=totalTop+'px';
+  _adjusting=false;}
 
 function toggleHoy(){
   _hoyCollapsed=!_hoyCollapsed;
@@ -1356,7 +1359,10 @@ function initGraph(){
     .force('y',d3.forceY(d=>{const g=gm.get(d.id);return g!=null?genYs[g]||H/2:H/2}).strength(.9));
   updateGraph();}
 
+let _updating=false;
 function updateGraph(){
+  if(_updating)return;_updating=true;
+  try{
   const svg=d3.select(svgEl),ll=svg.select('.root .ll'),nl=svg.select('.root .nl');
   const pos=new Map(d3Nodes.map(n=>[n.id,{x:n.x,y:n.y}]));
   d3Nodes=persons.map(p=>({...p,x:pos.get(p.id)?.x,y:pos.get(p.id)?.y}));
@@ -1409,7 +1415,8 @@ function updateGraph(){
   sim.on('tick',()=>{svg.selectAll('line.ln').attr('x1',d=>d.source?.x||0).attr('y1',d=>d.source?.y||0).attr('x2',d=>d.target?.x||0).attr('y2',d=>d.target?.y||0);svg.selectAll('g.nd').attr('transform',d=>`translate(${d.x||0},${d.y||0})`);});
   sim.alpha(.4).restart();updateStats();
   // Re-apply tree layout if active
-  if(layoutMode==='tree')setTimeout(applyTreeLayout,50);}
+  if(layoutMode==='tree')setTimeout(applyTreeLayout,50);
+  }finally{_updating=false;}}
 
 function renderHL(){d3.select(svgEl).selectAll('.nd-base').attr('filter',d=>selectedId&&d.id===selectedId?`drop-shadow(0 0 8px ${nStyle(d).ring})`:'none');}
 
