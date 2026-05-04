@@ -72,40 +72,60 @@ body{font-family:'DM Sans',system-ui,sans-serif;color:#1e293b}
 /* ── ONBOARDING WIZARD ── */
 #welcome{position:fixed;inset:0;z-index:200;display:flex;align-items:center;justify-content:center;padding:16px;background:rgba(245,240,232,.92);backdrop-filter:blur(8px)}
 #wc{background:#fff;border:1px solid #e2d5c3;border-radius:20px;padding:0;max-width:440px;width:100%;box-shadow:0 24px 60px rgba(0,0,0,.14);overflow:hidden}
-.wc-header{background:linear-gradient(135deg,#f0fdf4,#fff);border-bottom:1px solid #e8ddd0;padding:20px 24px 16px;display:flex;align-items:center;gap:12px}
-.wc-leaf{width:36px;height:36px;background:linear-gradient(135deg,#22c55e,#16a34a);border-radius:50% 50% 50% 10%;display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0}
-.wc-brand{font-family:'Playfair Display',serif;font-size:20px;color:#14532d;font-weight:600}
-.wc-prog-wrap{padding:0 24px;margin-top:14px}
-.wc-prog-track{background:#e8ddd0;border-radius:20px;height:4px;overflow:hidden}
-.wc-prog-fill{height:4px;background:linear-gradient(90deg,#16a34a,#22c55e);border-radius:20px;transition:width .4s ease}
-.wc-prog-lbl{display:flex;justify-content:space-between;font-size:10px;color:#c4a882;margin-top:5px}
-.wc-body{padding:20px 24px 24px}
-.wc-q{font-family:'Playfair Display',serif;font-size:19px;color:#0f172a;margin-bottom:6px;line-height:1.3}
-.wc-hint{font-size:12px;color:#a8906c;margin-bottom:16px;line-height:1.45}
-.wc-inp{background:#f9f5f0;border:1.5px solid #e2d5c3;border-radius:10px;padding:12px 14px;font-size:15px;width:100%;outline:none;font-family:'DM Sans',sans-serif;color:#1e293b;transition:border-color .15s;display:block}
+.wc-header{background:linear-gradient(135deg,#f0fdf4,#fff);border-bottom:1px solid #e8ddd0;padding:18px 22px 14px;display:flex;align-items:center;gap:12px}
+.wc-leaf{width:34px;height:34px;background:linear-gradient(135deg,#22c55e,#16a34a);border-radius:50% 50% 50% 10%;display:flex;align-items:center;justify-content:center;font-size:17px;flex-shrink:0}
+.wc-brand{font-family:'Playfair Display',serif;font-size:19px;color:#14532d;font-weight:600}
+.wc-steps-bar{display:flex;gap:4px;padding:10px 22px 0}
+.wc-step-dot{flex:1;height:3px;border-radius:2px;background:#e8ddd0;transition:background .3s}
+.wc-step-dot.done{background:#16a34a}
+.wc-step-dot.active{background:#4ade80}
+.wc-body{padding:18px 22px 22px}
+.wc-q{font-family:'Playfair Display',serif;font-size:18px;color:#0f172a;margin-bottom:5px;line-height:1.3}
+.wc-hint{font-size:12px;color:#a8906c;margin-bottom:14px;line-height:1.45}
+/* Search */
+.wc-search-wrap{position:relative;margin-bottom:10px}
+.wc-search-ico{position:absolute;left:12px;top:50%;transform:translateY(-50%);color:#c4a882;pointer-events:none}
+.wc-search-inp{background:#f9f5f0;border:1.5px solid #e2d5c3;border-radius:10px;padding:11px 12px 11px 36px;font-size:14px;width:100%;outline:none;font-family:'DM Sans',sans-serif;color:#1e293b;transition:border-color .15s;display:block}
+.wc-search-inp:focus{border-color:#16a34a;background:#fff}
+.wc-search-inp::placeholder{color:#d4c5b0}
+.wc-results{max-height:220px;overflow-y:auto;border:1px solid #e8ddd0;border-radius:10px;background:#fff;margin-bottom:10px}
+.wc-result{display:flex;align-items:center;gap:10px;padding:10px 12px;cursor:pointer;border-bottom:1px solid #f5f0e8;transition:background .1s}
+.wc-result:last-child{border-bottom:none}
+.wc-result:hover{background:#f9f5f0}
+.wc-result.selected{background:#f0fdf4;border-color:#bbf7d0}
+.wc-result-av{width:32px;height:32px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;color:#fff;flex-shrink:0}
+.wc-result-nm{font-size:13px;font-weight:500;color:#1e293b}
+.wc-result-hint{font-size:10.5px;color:#a8906c;margin-top:1px}
+.wc-result-check{margin-left:auto;color:#16a34a;font-size:16px;opacity:0}
+.wc-result.selected .wc-result-check{opacity:1}
+.wc-not-found{text-align:center;padding:16px;color:#c4a882;font-size:12.5px}
+/* Buttons */
+.wc-next{width:100%;background:linear-gradient(135deg,#16a34a,#15803d);border:none;border-radius:10px;padding:12px;font-size:13.5px;font-weight:600;color:#fff;cursor:pointer;font-family:inherit;margin-top:12px;box-shadow:0 3px 14px rgba(22,163,74,.2);transition:all .2s}
+.wc-next:hover{background:linear-gradient(135deg,#22c55e,#16a34a)}
+.wc-sec{width:100%;background:transparent;border:1.5px solid #e2d5c3;border-radius:10px;padding:10px;font-size:13px;color:#78563a;cursor:pointer;font-family:inherit;margin-top:6px;transition:all .15s}
+.wc-sec:hover{background:#f9f5f0}
+.wc-skip-lnk{text-align:center;margin-top:8px;font-size:11px;color:#c4a882;cursor:pointer}
+.wc-skip-lnk:hover{color:#78563a}
+/* Confirm card */
+.wc-confirm-card{background:#f9f5f0;border:1px solid #e8ddd0;border-radius:10px;padding:13px;margin-bottom:12px;display:flex;align-items:center;gap:11px}
+.wc-confirm-av{width:44px;height:44px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:700;color:#fff;flex-shrink:0}
+.wc-confirm-nm{font-size:15px;font-weight:600;color:#1e293b;font-family:'Playfair Display',serif}
+.wc-confirm-sub{font-size:11px;color:#a8906c;margin-top:2px}
+/* New person mini form */
+.wc-inp{background:#f9f5f0;border:1.5px solid #e2d5c3;border-radius:10px;padding:11px 13px;font-size:14px;width:100%;outline:none;font-family:'DM Sans',sans-serif;color:#1e293b;transition:border-color .15s;display:block;margin-bottom:8px}
 .wc-inp:focus{border-color:#16a34a;background:#fff}
 .wc-inp::placeholder{color:#d4c5b0}
-.wc-gender-row{display:flex;gap:8px;margin-top:10px}
-.wc-gender-btn{flex:1;padding:9px 0;border:1.5px solid #e2d5c3;background:#f9f5f0;border-radius:9px;font-size:13px;cursor:pointer;font-family:inherit;color:#78563a;transition:all .15s;font-weight:500}
-.wc-gender-btn:hover,.wc-gender-btn.sel{border-color:#16a34a;background:#f0fdf4;color:#14532d}
-.wc-yr-inp{background:#f9f5f0;border:1.5px solid #e2d5c3;border-radius:10px;padding:10px 14px;font-size:14px;width:100%;outline:none;font-family:'DM Sans',sans-serif;color:#1e293b;transition:border-color .15s;margin-top:10px}
-.wc-yr-inp:focus{border-color:#16a34a;background:#fff}
-.wc-next{width:100%;background:linear-gradient(135deg,#16a34a,#15803d);border:none;border-radius:10px;padding:13px;font-size:14px;font-weight:600;color:#fff;cursor:pointer;font-family:inherit;margin-top:16px;box-shadow:0 3px 14px rgba(22,163,74,.25);transition:all .2s}
-.wc-next:hover{background:linear-gradient(135deg,#22c55e,#16a34a)}
-.wc-next:disabled{background:#e2d5c3;box-shadow:none;cursor:not-allowed;color:#a8906c}
-.wc-skip-lnk{text-align:center;margin-top:10px;font-size:11px;color:#c4a882;cursor:pointer}
-.wc-skip-lnk:hover{color:#78563a}
-.wc-siblings-row{display:flex;flex-direction:column;gap:7px;margin-top:8px;max-height:180px;overflow-y:auto}
-.wc-sib-item{display:flex;gap:8px;align-items:center}
-.wc-sib-inp{flex:1;background:#f9f5f0;border:1.5px solid #e2d5c3;border-radius:8px;padding:9px 11px;font-size:13px;outline:none;font-family:'DM Sans',sans-serif;color:#1e293b}
-.wc-sib-inp:focus{border-color:#16a34a;background:#fff}
-.wc-add-sib{background:#f0fdf4;border:1.5px solid #bbf7d0;color:#16a34a;border-radius:8px;padding:7px 12px;font-size:12px;cursor:pointer;font-family:inherit;white-space:nowrap;font-weight:500}
-.wc-summary{background:#f9f5f0;border:1px solid #e8ddd0;border-radius:10px;padding:12px 14px;margin-top:12px}
-.wc-sum-row{display:flex;align-items:center;gap:9px;padding:5px 0;border-bottom:1px solid #f0e8dc}
+.wc-gender-row{display:flex;gap:6px;margin-bottom:10px}
+.wc-gender-btn{flex:1;padding:8px 0;border:1.5px solid #e2d5c3;background:#f9f5f0;border-radius:8px;font-size:12.5px;cursor:pointer;font-family:inherit;color:#78563a;transition:all .15s;font-weight:500}
+.wc-gender-btn.sel{border-color:#16a34a;background:#f0fdf4;color:#14532d}
+/* Done */
+.wc-done-ico{font-size:40px;text-align:center;margin-bottom:10px}
+.wc-summary{background:#f9f5f0;border:1px solid #e8ddd0;border-radius:10px;padding:11px 13px;margin:10px 0}
+.wc-sum-row{display:flex;align-items:center;gap:8px;padding:5px 0;border-bottom:1px solid #f0e8dc}
 .wc-sum-row:last-child{border-bottom:none}
-.wc-sum-av{width:26px;height:26px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:9px;font-weight:700;color:#fff;flex-shrink:0}
-.wc-sum-nm{font-size:12.5px;font-weight:500;color:#1e293b}
-.wc-sum-rl{font-size:10.5px;color:#a8906c}
+.wc-sum-av{width:24px;height:24px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:9px;font-weight:700;color:#fff;flex-shrink:0}
+.wc-sum-nm{font-size:12px;font-weight:500;color:#1e293b}
+.wc-sum-rl{font-size:10px;color:#a8906c}
 
 /* ── ACTIVITY ── */
 #act{position:fixed;top:66px;left:50%;transform:translateX(-50%) translateY(-8px);background:#f0fdf4;border:1px solid #bbf7d0;border-radius:20px;padding:5px 15px;font-size:12px;color:#166534;font-weight:500;z-index:50;opacity:0;transition:all .25s;pointer-events:none;white-space:nowrap;box-shadow:0 2px 10px rgba(22,163,74,.15)}
@@ -501,15 +521,18 @@ textarea{resize:none;height:72px;line-height:1.5}
    <div class="wc-leaf">🌿</div>
    <div>
     <div class="wc-brand">Raíces</div>
-    <div style="font-size:10px;color:#a8906c;margin-top:1px;letter-spacing:.01em">La red viva de tu familia</div>
+    <div style="font-size:10px;color:#a8906c;margin-top:1px">La red viva de tu familia</div>
    </div>
   </div>
-  <div class="wc-prog-wrap">
-   <div class="wc-prog-track"><div class="wc-prog-fill" id="wc-prog" style="width:14%"></div></div>
-   <div class="wc-prog-lbl"><span id="wc-step-lbl">Paso 1 de 6</span><span id="wc-step-name">Tu nombre</span></div>
+  <div class="wc-steps-bar">
+   <div class="wc-step-dot active" id="wsd-0"></div>
+   <div class="wc-step-dot" id="wsd-1"></div>
+   <div class="wc-step-dot" id="wsd-2"></div>
+   <div class="wc-step-dot" id="wsd-3"></div>
   </div>
   <div class="wc-body" id="wc-body"></div>
  </div>
+</div>
 </div>
 
 <!-- HEADER -->
@@ -1049,193 +1072,187 @@ function setSyncStatus(s,m){
   if(dm)dm.style.background=s==='ok'?'#22c55e':s==='busy'?'#f59e0b':s==='err'?'#ef4444':'#d4c5b0';
   if(lm)lm.textContent=m;}
 
-// ══════ ONBOARDING WIZARD ══════
-const WZ_STEPS=['me','mom','dad','siblings','grandparents','done'];
-let wz={step:0,data:{me:{},mom:{},dad:{},siblings:[],maternal:{gf:{},gm:{}},paternal:{gf:{},gm:{}}}};
+// ══════ ONBOARDING WIZARD — Find First Flow ══════
+let wz={step:0,selectedId:null,newPersonData:{}};
+
+function wzStepDots(active){
+  for(let i=0;i<4;i++){
+    const el=document.getElementById('wsd-'+i);
+    if(!el)continue;
+    el.className='wc-step-dot'+(i<active?' done':i===active?' active':'');
+  }}
 
 function wzRender(){
   const body=document.getElementById('wc-body');
-  const prog=document.getElementById('wc-prog');
-  const stepLbl=document.getElementById('wc-step-lbl');
-  const stepName=document.getElementById('wc-step-name');
-  const s=wz.step;
-  const pct=[14,30,46,60,78,100][s]||100;
-  const names=['Tu nombre','Tu madre','Tu padre','Hermanos','Abuelos','¡Listo!'];
-  if(prog)prog.style.width=pct+'%';
-  if(stepLbl)stepLbl.textContent=`Paso ${s+1} de 6`;
-  if(stepName)stepName.textContent=names[s]||'';
-  const steps=[wzStepMe,wzStepMom,wzStepDad,wzStepSiblings,wzStepGrandparents,wzStepDone];
-  if(steps[s])body.innerHTML=steps[s]();
-  // Auto-focus first input
-  setTimeout(()=>{const inp=body.querySelector('input');if(inp)inp.focus();},80);
-}
+  if(!body)return;
+  const steps=[wzStep0,wzStep1,wzStep2,wzStep3];
+  if(steps[wz.step])body.innerHTML=steps[wz.step]();
+  wzStepDots(wz.step);
+  setTimeout(()=>{const inp=body.querySelector('input');if(inp)inp.focus();},80);}
 
-function wzStepMe(){return`
-  <div class="wc-q">¿Cómo te llamas?</div>
-  <div class="wc-hint">Este será tu nodo central — el punto de partida del árbol</div>
-  <input class="wc-inp" id="wz-me-fn" placeholder="Tu nombre" value="${wz.data.me.firstName||''}" oninput="wz.data.me.firstName=this.value">
-  <input class="wc-inp" style="margin-top:8px" id="wz-me-ln" placeholder="Tu apellido" value="${wz.data.me.lastName||''}" oninput="wz.data.me.lastName=this.value">
-  <div class="wc-gender-row">
-    <button class="wc-gender-btn${wz.data.me.gender==='male'?' sel':''}" onclick="wz.data.me.gender='male';wzRender()">Hombre</button>
-    <button class="wc-gender-btn${wz.data.me.gender==='female'?' sel':''}" onclick="wz.data.me.gender='female';wzRender()">Mujer</button>
+// ── Step 0: Welcome + explain ──
+function wzStep0(){return`
+  <div class="wc-q">Bienvenido/a 👋</div>
+  <div class="wc-hint" style="margin-bottom:16px">Antes de agregar nada, <strong>busca si ya estás en la red</strong>. Alguien pudo haberte agregado antes.</div>
+  <div style="background:#f0fdf4;border:1px solid #bbf7d0;border-radius:10px;padding:12px 14px;margin-bottom:14px">
+    <div style="font-size:12.5px;color:#166534;font-weight:500;margin-bottom:6px">¿Cómo funciona?</div>
+    <div style="font-size:12px;color:#166534;line-height:1.6">
+      1. Explora la red y busca tu nombre<br>
+      2. Si te encuentras → ese nodo eres tú<br>
+      3. Si no apareces → te creamos en el lugar correcto
+    </div>
   </div>
-  <button class="wc-next" onclick="wzNext()" id="wz-next">Continuar →</button>
-  <div class="wc-skip-lnk" onclick="dismissWelcome()">Saltar y entrar directo</div>`;}
+  <button class="wc-next" onclick="wz.step=1;wzRender()">Buscarme en la red →</button>
+  <div class="wc-skip-lnk" onclick="dismissWelcome()">Explorar sin configurar</div>`;}
 
-function wzStepMom(){return`
-  <div class="wc-q">¿Cómo se llamaba tu mamá?</div>
-  <div class="wc-hint">Si no la conociste o no quieres agregarla ahora, puedes omitir este paso</div>
-  <input class="wc-inp" id="wz-mom-fn" placeholder="Nombre de tu madre" value="${wz.data.mom.firstName||''}" oninput="wz.data.mom.firstName=this.value">
-  <input class="wc-inp" style="margin-top:8px" placeholder="Apellido (opcional)" value="${wz.data.mom.lastName||''}" oninput="wz.data.mom.lastName=this.value">
-  <input class="wc-yr-inp" type="number" placeholder="Año de nacimiento (opcional)" value="${wz.data.mom.birthYear||''}" oninput="wz.data.mom.birthYear=this.value" min="1850" max="2010">
-  <button class="wc-next" onclick="wzNext()">Continuar →</button>
-  <div class="wc-skip-lnk" onclick="wzSkip()">No sé o prefiero omitir</div>`;}
+// ── Step 1: Search for yourself ──
+function wzStep1(){
+  const results=persons.length>0?wzSearchResults(''):'';
+  return`
+  <div class="wc-q">¿Ya estás en la red?</div>
+  <div class="wc-hint">Escribe tu nombre y selecciónate si apareces</div>
+  <div class="wc-search-wrap">
+    <svg class="wc-search-ico" width="14" height="14" viewBox="0 0 16 16" fill="none"><circle cx="6.5" cy="6.5" r="5.5" stroke="#c4a882" stroke-width="1.4"/><path d="M11 11l3 3" stroke="#c4a882" stroke-width="1.4" stroke-linecap="round"/></svg>
+    <input class="wc-search-inp" id="wz-search" placeholder="Escribe tu nombre…" oninput="wzUpdateSearch(this.value)">
+  </div>
+  <div class="wc-results" id="wz-results">${persons.length===0?'<div class="wc-not-found">La red está vacía — serás el primero</div>':wzSearchResults('')}</div>
+  <div id="wz-sel-confirm"></div>
+  <button class="wc-next" id="wz-btn-found" style="display:none" onclick="wzConfirmFound()">✓ Este soy yo →</button>
+  <button class="wc-sec" onclick="wz.step=2;wz.selectedId=null;wzRender()">No aparezco — agregarme →</button>
+  <div class="wc-skip-lnk" onclick="dismissWelcome()">Saltar y explorar solo</div>`;}
 
-function wzStepDad(){return`
-  <div class="wc-q">¿Y tu papá?</div>
-  <div class="wc-hint">Puedes omitirlo si no aplica o no lo conociste</div>
-  <input class="wc-inp" placeholder="Nombre de tu padre" value="${wz.data.dad.firstName||''}" oninput="wz.data.dad.firstName=this.value">
-  <input class="wc-inp" style="margin-top:8px" placeholder="Apellido (opcional)" value="${wz.data.dad.lastName||''}" oninput="wz.data.dad.lastName=this.value">
-  <input class="wc-yr-inp" type="number" placeholder="Año de nacimiento (opcional)" value="${wz.data.dad.birthYear||''}" oninput="wz.data.dad.birthYear=this.value" min="1850" max="2010">
-  <button class="wc-next" onclick="wzNext()">Continuar →</button>
-  <div class="wc-skip-lnk" onclick="wzSkip()">No sé o prefiero omitir</div>`;}
+function wzSearchResults(q){
+  const filter=q.toLowerCase().trim();
+  const list=filter
+    ?persons.filter(p=>`${p.firstName} ${p.lastName}`.toLowerCase().includes(filter))
+    :persons.slice(0,12);
+  if(!list.length)return`<div class="wc-not-found">No encontrado — prueba con otro nombre</div>`;
+  return list.map(p=>{
+    const ns=nStyle(p);
+    const conns=getParents(p.id).map(pr=>pr.firstName).join(' y ');
+    const hint=conns?`Hijo/a de ${conns}`:p.birthDate?`n. ${p.birthDate.slice(0,4)}`:'';
+    return`<div class="wc-result${wz.selectedId===p.id?' selected':''}" onclick="wzSelectPerson('${p.id}')">
+      <div class="wc-result-av" style="background:${ns.border}">${initials(p)}</div>
+      <div>
+        <div class="wc-result-nm">${fullName(p)}</div>
+        ${hint?`<div class="wc-result-hint">${hint}</div>`:''}
+      </div>
+      <span class="wc-result-check">✓</span>
+    </div>`;}).join('');}
 
-function wzStepSiblings(){
-  const sibs=wz.data.siblings;
-  while(sibs.length<1)sibs.push({name:'',gender:'unknown'});
-  const rows=sibs.map((s,i)=>`<div class="wc-sib-item">
-    <input class="wc-sib-inp" placeholder="Nombre del hermano/a" value="${s.name}" oninput="wz.data.siblings[${i}].name=this.value">
-    <select style="background:#f9f5f0;border:1.5px solid #e2d5c3;border-radius:8px;padding:9px 8px;font-size:12px;color:#78563a;outline:none" onchange="wz.data.siblings[${i}].gender=this.value">
-      <option value="unknown"${s.gender==='unknown'?' selected':''}>?</option>
-      <option value="male"${s.gender==='male'?' selected':''}>H</option>
-      <option value="female"${s.gender==='female'?' selected':''}>M</option>
-    </select>
-  </div>`).join('');
-  return`<div class="wc-q">¿Tienes hermanos?</div>
-  <div class="wc-hint">Escribe sus nombres. Puedes agregar varios o dejar en blanco si no tienes.</div>
-  <div class="wc-siblings-row">${rows}</div>
-  <button class="wc-add-sib" style="margin-top:8px;width:100%" onclick="wz.data.siblings.push({name:'',gender:'unknown'});wzRender()">+ Agregar otro hermano/a</button>
-  <button class="wc-next" style="margin-top:12px" onclick="wzNext()">Continuar →</button>
-  <div class="wc-skip-lnk" onclick="wzSkip()">No tengo o prefiero omitir</div>`;}
+function wzUpdateSearch(q){
+  const el=document.getElementById('wz-results');
+  if(el)el.innerHTML=wzSearchResults(q);
+  // Re-highlight selected
+  if(wz.selectedId){
+    document.querySelectorAll('.wc-result').forEach(r=>{
+      r.classList.remove('selected');
+      if(r.querySelector('.wc-result-nm')?.textContent===fullName(persons.find(p=>p.id===wz.selectedId))){
+        r.classList.add('selected');
+        r.querySelector('.wc-result-check').style.opacity='1';
+      }
+    });
+  }}
 
-function wzStepGrandparents(){return`
-  <div class="wc-q">¿Conociste a tus abuelos?</div>
-  <div class="wc-hint">Solo los nombres — puedes completar el resto después</div>
-  <div style="font-size:10px;color:#a8906c;text-transform:uppercase;letter-spacing:.07em;margin-bottom:6px">Por parte de madre</div>
-  <input class="wc-inp" style="margin-bottom:7px" placeholder="Abuelo materno (nombre)" value="${wz.data.maternal.gf.firstName||''}" oninput="wz.data.maternal.gf.firstName=this.value">
-  <input class="wc-inp" placeholder="Abuela materna (nombre)" value="${wz.data.maternal.gm.firstName||''}" oninput="wz.data.maternal.gm.firstName=this.value">
-  <div style="font-size:10px;color:#a8906c;text-transform:uppercase;letter-spacing:.07em;margin:10px 0 6px">Por parte de padre</div>
-  <input class="wc-inp" style="margin-bottom:7px" placeholder="Abuelo paterno (nombre)" value="${wz.data.paternal.gf.firstName||''}" oninput="wz.data.paternal.gf.firstName=this.value">
-  <input class="wc-inp" placeholder="Abuela paterna (nombre)" value="${wz.data.paternal.gm.firstName||''}" oninput="wz.data.paternal.gm.firstName=this.value">
-  <button class="wc-next" style="margin-top:14px" onclick="wzFinish()">Crear mi árbol →</button>
-  <div class="wc-skip-lnk" onclick="wzFinish()">Omitir y crear árbol</div>`;}
+function wzSelectPerson(pid){
+  wz.selectedId=pid;
+  const p=persons.find(x=>x.id===pid);if(!p)return;
+  const ns=nStyle(p);
+  // Update UI
+  document.querySelectorAll('.wc-result').forEach(r=>r.classList.remove('selected'));
+  event?.currentTarget?.classList?.add('selected');
+  const conf=document.getElementById('wz-sel-confirm');
+  if(conf)conf.innerHTML=`<div class="wc-confirm-card" style="margin-top:10px">
+    <div class="wc-confirm-av" style="background:${ns.border}">${initials(p)}</div>
+    <div><div class="wc-confirm-nm">${fullName(p)}</div>
+    <div class="wc-confirm-sub">${getParents(pid).map(pr=>pr.firstName).join(' y ')||p.location||'Sin información adicional'}</div></div>
+  </div>`;
+  const btn=document.getElementById('wz-btn-found');
+  if(btn)btn.style.display='block';}
 
-function wzStepDone(){
-  // Build summary
-  const added=[{nm:wz.data.me.firstName+' '+wz.data.me.lastName,rl:'Tú',c:'#f59e0b'}];
-  if(wz.data.mom.firstName)added.push({nm:wz.data.mom.firstName,rl:'Tu madre',c:'#ec4899'});
-  if(wz.data.dad.firstName)added.push({nm:wz.data.dad.firstName,rl:'Tu padre',c:'#3b82f6'});
-  wz.data.siblings.forEach(s=>{if(s.name)added.push({nm:s.name,rl:'Hermano/a',c:s.gender==='male'?'#3b82f6':'#ec4899'});});
-  if(wz.data.maternal.gm.firstName)added.push({nm:wz.data.maternal.gm.firstName,rl:'Abuela materna',c:'#ec4899'});
-  if(wz.data.maternal.gf.firstName)added.push({nm:wz.data.maternal.gf.firstName,rl:'Abuelo materno',c:'#3b82f6'});
-  if(wz.data.paternal.gm.firstName)added.push({nm:wz.data.paternal.gm.firstName,rl:'Abuela paterna',c:'#ec4899'});
-  if(wz.data.paternal.gf.firstName)added.push({nm:wz.data.paternal.gf.firstName,rl:'Abuelo paterno',c:'#3b82f6'});
-  const rows=added.map(a=>`<div class="wc-sum-row"><div class="wc-sum-av" style="background:${a.c}">${a.nm[0]||'?'}</div><div><div class="wc-sum-nm">${a.nm}</div><div class="wc-sum-rl">${a.rl}</div></div></div>`).join('');
-  return`<div class="wc-q" style="font-size:22px">¡Tu árbol está listo! 🌿</div>
-  <div class="wc-hint">${added.length} personas agregadas. Puedes seguir construyendo desde la app.</div>
-  <div class="wc-summary">${rows}</div>
-  <button class="wc-next" style="margin-top:14px" onclick="dismissWelcome()">Explorar mi árbol →</button>`;}
+function wzConfirmFound(){
+  if(!wz.selectedId)return;
+  setViewer(wz.selectedId);
+  wz.step=3;wzRender();}
 
-function wzNext(){
-  const s=wz.step;
-  if(s===0&&!wz.data.me.firstName?.trim()){toast('Escribe al menos tu nombre','err');return;}
-  wz.step=Math.min(s+1,5);wzRender();}
-function wzSkip(){wz.step=Math.min(wz.step+1,5);wzRender();}
+// ── Step 2: Not found — create yourself ──
+function wzStep2(){return`
+  <div class="wc-q">Cuéntanos quién eres</div>
+  <div class="wc-hint">Te agregaremos a la red en el lugar correcto</div>
+  <input class="wc-inp" id="wz-fn" placeholder="Tu nombre *">
+  <input class="wc-inp" id="wz-ln" placeholder="Tu apellido">
+  <input class="wc-inp" id="wz-yr" type="number" placeholder="Año de nacimiento (ej: 1982)">
+  <div class="wc-gender-row">
+    <button class="wc-gender-btn${wz.newPersonData.gender==='male'?' sel':''}" onclick="wz.newPersonData.gender='male';document.querySelectorAll('.wc-gender-btn').forEach(b=>b.classList.remove('sel'));this.classList.add('sel')">Hombre</button>
+    <button class="wc-gender-btn${wz.newPersonData.gender==='female'?' sel':''}" onclick="wz.newPersonData.gender='female';document.querySelectorAll('.wc-gender-btn').forEach(b=>b.classList.remove('sel'));this.classList.add('sel')">Mujer</button>
+  </div>
+  <button class="wc-next" onclick="wzCreateSelf()">Agregarme a la red →</button>
+  <button class="wc-sec" onclick="wz.step=1;wzRender()">← Volver a buscar</button>`;}
 
-function wzFinish(){
-  const meId='me';
-  // ── Only clean if all persons are still seed placeholders ──
-  // If real data already exists, don't wipe it
-  const hasRealData=persons.some(p=>p.id!==meId&&p.firstName&&!p.firstName.startsWith('Abuelo')&&!p.firstName.startsWith('Abuela')&&!p.firstName.startsWith('Yo'));
-  if(!hasRealData){
-    persons=persons.filter(p=>p.id===meId);
-    relations=[];
-  }
+function wzCreateSelf(){
+  const fn=document.getElementById('wz-fn')?.value?.trim();
+  if(!fn){toast('El nombre es obligatorio','err');return;}
+  // Double check for duplicates
+  const dupes=findDuplicates(fn,document.getElementById('wz-ln')?.value?.trim(),'');
+  if(dupes.length){
+    const names=dupes.map(d=>fullName(d)).join(', ');
+    showConfirm(
+      '¿Ya existe esta persona?',
+      `Encontramos a <strong>${names}</strong> en la red.<br><br>¿Eres tú esa persona o eres alguien diferente?`,
+      `function(){const p=persons.find(x=>x.firstName.toLowerCase()==='${fn.toLowerCase()}');if(p){wz.selectedId=p.id;wzConfirmFound();}}`,
+      'wzCreateSelfForced',
+      'Soy esa persona','Soy diferente');
+    return;}
+  wzCreateSelfForced();}
 
-  // ── Update 'me' node with real name ──
-  const meNode=persons.find(p=>p.id===meId);
-  if(meNode){
-    meNode.firstName=(wz.data.me.firstName||'Yo').trim();
-    meNode.lastName=(wz.data.me.lastName||'').trim();
-    if(wz.data.me.gender&&wz.data.me.gender!=='unknown')meNode.gender=wz.data.me.gender;
-  }
+function wzCreateSelfForced(){
+  const fn=document.getElementById('wz-fn')?.value?.trim()||(wz.newPersonData.firstName||'Yo');
+  const yr=document.getElementById('wz-yr')?.value;
+  const gender=wz.newPersonData.gender||'unknown';
+  const newId=uid();
+  const p={id:newId,firstName:fn,
+    lastName:document.getElementById('wz-ln')?.value?.trim()||'',
+    gender,birthDate:yr?yr+'-01-01':'',deathDate:'',
+    location:'',story:'',photo:null,status:'unverified',notes:''};
+  persons.push(p);
+  save();
+  setViewer(newId);
+  wz.selectedId=newId;
+  wz.step=3;wzRender();}
 
-  function mkP(d,gender){
-    return{id:uid(),firstName:(d.firstName||'').trim(),lastName:(d.lastName||'').trim(),
-      gender,birthDate:d.birthYear?`${d.birthYear}-01-01`:'',deathDate:'',
-      location:'',story:'',photo:null,status:'unverified',notes:''};}
-  function addParent(srcId,tgtId){
-    if(srcId&&tgtId&&!isDupe(srcId,tgtId))
-      relations.push({id:uid(),source:srcId,target:tgtId,type:'parent'});}
+// ── Step 3: Done ──
+function wzStep3(){
+  const p=persons.find(x=>x.id===viewerId);
+  const ns=p?nStyle(p):{border:'#16a34a'};
+  return`
+  <div class="wc-done-ico">🌿</div>
+  <div class="wc-q" style="text-align:center">¡Ya estás en la red!</div>
+  <div class="wc-hint" style="text-align:center;margin-bottom:14px">
+    ${p?`Tu nodo es <strong>${fullName(p)}</strong> — marcado con el anillo dorado`:'Ahora puedes explorar la red'}
+  </div>
+  <div style="background:#f0fdf4;border:1px solid #bbf7d0;border-radius:10px;padding:12px 14px;margin-bottom:14px;font-size:12px;color:#166534;line-height:1.65">
+    <strong>¿Qué puedes hacer ahora?</strong><br>
+    👆 Toca cualquier nodo para ver el perfil<br>
+    ➕ Desde cada perfil agrega padre, madre, hijo/a<br>
+    📷 Sube tu foto para completar tu perfil<br>
+    🔍 Explora cómo estás conectado con cada familiar
+  </div>
+  <button class="wc-next" onclick="dismissWelcome()">Explorar mi árbol familiar →</button>`;}
 
-  // ── Create mom and save her ID directly ──
-  let momId=null,dadId=null;
-  if(wz.data.mom.firstName?.trim()){
-    const mom=mkP(wz.data.mom,'female');
-    persons.push(mom);momId=mom.id;addParent(momId,meId);}
-  if(wz.data.dad.firstName?.trim()){
-    const dad=mkP(wz.data.dad,'male');
-    persons.push(dad);dadId=dad.id;addParent(dadId,meId);}
-  // Add partner relation between parents if both exist
-  if(momId&&dadId)relations.push({id:uid(),source:dadId,target:momId,type:'partner'});
-
-  // ── Siblings — use saved IDs ──
-  wz.data.siblings.forEach(s=>{
-    if(!s.name?.trim())return;
-    const sib=mkP({firstName:s.name},s.gender||'unknown');
-    persons.push(sib);
-    addParent(momId,sib.id);
-    addParent(dadId,sib.id);});
-
-  // ── Grandparents — use saved parent IDs ──
-  if(momId){
-    if(wz.data.maternal.gf.firstName?.trim()){
-      const gf=mkP(wz.data.maternal.gf,'male');persons.push(gf);addParent(gf.id,momId);}
-    if(wz.data.maternal.gm.firstName?.trim()){
-      const gm=mkP(wz.data.maternal.gm,'female');persons.push(gm);addParent(gm.id,momId);}
-  }
-  if(dadId){
-    if(wz.data.paternal.gf.firstName?.trim()){
-      const gf=mkP(wz.data.paternal.gf,'male');persons.push(gf);addParent(gf.id,dadId);}
-    if(wz.data.paternal.gm.firstName?.trim()){
-      const gm=mkP(wz.data.paternal.gm,'female');persons.push(gm);addParent(gm.id,dadId);}
-  }
-  save();wz.step=5;wzRender();}
-
-function showIdentityHelper(){
-  toast('Abre cualquier perfil y pulsa "Este soy yo" para cambiar tu perspectiva','info');}
-window.showIdentityHelper=showIdentityHelper;
-
-function openMobMenu(){
-  document.getElementById('mob-menu').classList.add('open');
-  // Sync status in menu
-  const lbl=document.getElementById('sync-lbl')?.textContent||'Sin conectar';
-  const el=document.getElementById('mob-sync-lbl');
-  if(el)el.textContent=lbl;}
-function closeMobMenu(){document.getElementById('mob-menu').classList.remove('open');}
-window.openMobMenu=openMobMenu;window.closeMobMenu=closeMobMenu;
-
-// Mobile stats sync — called from within updateStats
 
 function dismissWelcome(){
   document.getElementById('welcome').style.display='none';
   try{localStorage.setItem('raices_seen','1')}catch(e){}
-  d3Nodes=[];
-  // Reinit graph with potentially updated data from wizard
-  initGraph();}
+  // Only reinit if graph hasn't been initialized yet
+  if(!sim||d3Nodes.length===0){
+    d3Nodes=[];initGraph();
+  } else {
+    // Graph already running — just update to reflect any wizard changes
+    updateGraph();
+  }}
 function showWelcome(){
   document.getElementById('welcome').style.display='flex';
-  wz={step:0,data:{me:{},mom:{},dad:{},siblings:[{name:'',gender:'unknown'}],maternal:{gf:{},gm:{}},paternal:{gf:{},gm:{}}}};
+  wz={step:0,selectedId:null,newPersonData:{}};
   wzRender();}
 
 function compressPhoto(file,cb){
@@ -1964,7 +1981,7 @@ if(_fbStored){
   try{localStorage.setItem(FB_KEY,_s)}catch(e){}
   setTimeout(()=>_tryConnect(_EMBEDDED,0),500);
 }
-window.persons=persons;window.relations=relations;window.showProfile=showProfile;window.openPanel=openPanel;window.closePanel=closePanel;window.renderHL=renderHL;window.addRelativeOf=addRelativeOf;window.prevRel=prevRel;window.addPerson=addPerson;window.savePerson=savePerson;window.delPerson=delPerson;window.addRel=addRel;window.submitAR=submitAR;window.pickPhotoForm=pickPhotoForm;window.pickPhotoAR=pickPhotoAR;window.openFbModal=openFbModal;window.deleteRel=deleteRel;window.closeFbModal=closeFbModal;window.connectFirebase=connectFirebase;window.showWelcome=showWelcome;window.wzNext=wzNext;window.wzSkip=wzSkip;window.wzFinish=wzFinish;window.hideMagic=hideMagic;window.closeConfirm=closeConfirm;window.toggleHoy=toggleHoy;window._doAddPerson=_doAddPerson;window.openPDF=openPDF;window.exportData=exportData;window.importData=importData;
+window.persons=persons;window.relations=relations;window.showProfile=showProfile;window.openPanel=openPanel;window.closePanel=closePanel;window.renderHL=renderHL;window.addRelativeOf=addRelativeOf;window.prevRel=prevRel;window.addPerson=addPerson;window.savePerson=savePerson;window.delPerson=delPerson;window.addRel=addRel;window.submitAR=submitAR;window.pickPhotoForm=pickPhotoForm;window.pickPhotoAR=pickPhotoAR;window.openFbModal=openFbModal;window.deleteRel=deleteRel;window.closeFbModal=closeFbModal;window.connectFirebase=connectFirebase;window.showWelcome=showWelcome;window.wzRender=wzRender;window.wzUpdateSearch=wzUpdateSearch;window.wzSelectPerson=wzSelectPerson;window.wzConfirmFound=wzConfirmFound;window.wzCreateSelf=wzCreateSelf;window.wzCreateSelfForced=wzCreateSelfForced;window.hideMagic=hideMagic;window.closeConfirm=closeConfirm;window.toggleHoy=toggleHoy;window._doAddPerson=_doAddPerson;window.openPDF=openPDF;window.exportData=exportData;window.importData=importData;
 
 // ══════ GEDCOM IMPORT ══════
 function importGEDCOM(text){
