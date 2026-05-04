@@ -209,22 +209,23 @@ textarea{resize:none;height:72px;line-height:1.5}
 .mob-item-txt{font-size:14px;font-weight:500;color:#1e293b}
 .mob-item-sub{font-size:11px;color:#a8906c;margin-top:1px}
 .mob-close{width:36px;height:4px;background:#e2d5c3;border-radius:2px;margin:0 auto 14px;cursor:pointer}
-@media(max-width:640px){
-  #hd{padding:0 10px}
-  #hd-center{display:none}
-  #hd-right .hb:not(.pri):not(.amber){display:none}
-  #hd-right #sync-pill{display:none}
+@media(max-width:680px){
+  #hd{padding:0 10px;height:52px}
+  #hd-center{display:none!important}
+  #hd-right{display:none!important}
   #viewer-badge{display:none!important}
   #mob-hd-right{display:flex!important}
-  .hb.pri{padding:6px 12px;font-size:12px}
-  .hb.amber{padding:6px 12px;font-size:12px}
-  #logo-nm{font-size:14px}
+  #logo-nm{font-size:15px}
+  #logo-st{display:none}
+  #logo-creator{display:none!important}
+  #layout-toggle{bottom:10px;right:10px}
+  #legend{display:none!important}
 }
-@media(min-width:641px){
+@media(min-width:681px){
   #mob-hd-right{display:none!important}
 }
-#mob-hd-right{display:none;align-items:center;gap:6px}
-#mob-stats{font-size:10px;color:#a8906c;white-space:nowrap}
+#mob-hd-right{display:none;align-items:center;gap:8px;flex-shrink:0}
+#mob-stats{font-size:10.5px;color:#a8906c;white-space:nowrap;background:#f9f5f0;border-radius:20px;padding:3px 9px;border:1px solid #e8ddd0}
 #layout-toggle{position:fixed;bottom:14px;right:14px;display:flex;background:rgba(255,252,247,.95);border:1px solid #e2d5c3;border-radius:9px;overflow:hidden;box-shadow:0 2px 10px rgba(0,0,0,.08);z-index:10}
 .lt-btn{border:none;background:transparent;color:#a8906c;padding:7px 13px;font-size:11px;cursor:pointer;font-family:inherit;font-weight:500;transition:all .15s;display:flex;align-items:center;gap:5px}
 .lt-btn:hover{color:#78563a;background:#f5ede0}
@@ -548,6 +549,17 @@ textarea{resize:none;height:72px;line-height:1.5}
   <button class="hb pri" onclick="openPanel('person')">+ Persona</button>
  </div>
  <!-- MOBILE RIGHT -->
+ <div id="mob-hd-right">
+  <div id="mob-stats" style="font-size:10.5px;color:#a8906c;white-space:nowrap;background:#f9f5f0;border-radius:20px;padding:3px 9px;border:1px solid #e8ddd0">0 familiares</div>
+  <div style="display:flex;align-items:center;gap:5px;padding:3px 9px;border-radius:20px;background:#f0fdf4;border:1px solid #bbf7d0;cursor:pointer;font-size:10.5px;color:#166534" onclick="openFbModal()">
+   <span id="sync-dot-mob" style="width:6px;height:6px;border-radius:50%;background:#d4c5b0;flex-shrink:0;transition:background .3s"></span>
+   <span id="sync-lbl-mob" style="white-space:nowrap;max-width:55px;overflow:hidden;text-overflow:ellipsis">Sin conectar</span>
+  </div>
+  <button style="background:linear-gradient(135deg,#16a34a,#15803d);border:none;border-radius:8px;padding:7px 13px;cursor:pointer;color:#fff;font-size:13px;font-weight:600;font-family:inherit;white-space:nowrap;-webkit-tap-highlight-color:transparent" onclick="openPanel('person')">+ Persona</button>
+  <button style="background:#fff;border:1.5px solid #e2d5c3;border-radius:8px;padding:7px 10px;cursor:pointer;color:#78563a;display:flex;align-items:center;justify-content:center;-webkit-tap-highlight-color:transparent" onclick="openMobMenu()">
+   <svg width="18" height="13" viewBox="0 0 18 13" fill="none"><line x1="0" y1="1" x2="18" y2="1" stroke="#78563a" stroke-width="2" stroke-linecap="round"/><line x1="0" y1="6.5" x2="18" y2="6.5" stroke="#78563a" stroke-width="2" stroke-linecap="round"/><line x1="0" y1="12" x2="18" y2="12" stroke="#78563a" stroke-width="2" stroke-linecap="round"/></svg>
+  </button>
+ </div><!-- MOBILE RIGHT -->
  <div id="mob-hd-right">
   <div id="mob-stats"></div>
   <div id="sync-pill-mob" style="display:flex;align-items:center;gap:4px;padding:3px 8px;border-radius:20px;background:#f0fdf4;border:1px solid #bbf7d0;font-size:10px;color:#166534;cursor:pointer" onclick="openFbModal()">
