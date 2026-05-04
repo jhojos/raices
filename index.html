@@ -1890,7 +1890,10 @@ function detectAdmin(callback){
 }
 
 function claimAdmin(){
-  if(!viewerId||viewerId==='me'){toast('Primero identifícate en la red con "Este soy yo"','err');return;}
+  // Accept 'me' as valid if the node has a real name (not placeholder)
+  const vp=persons.find(x=>x.id===viewerId);
+  const isPlaceholder=!vp||!vp.firstName||vp.firstName==='Yo'||vp.firstName.includes('apellido');
+  if(!viewerId||isPlaceholder){toast('Primero identifícate en la red con "Este soy yo"','err');return;}
   if(typeof firebase==='undefined'||!firebase.apps.length){toast('Necesitas estar conectado a Firebase','err');return;}
   const p=persons.find(x=>x.id===viewerId);
   showConfirm(
