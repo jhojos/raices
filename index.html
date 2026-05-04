@@ -274,6 +274,36 @@ textarea{resize:none;height:72px;line-height:1.5}
 #toast.err{background:#fff1f2;border:1px solid #fca5a5;color:#7f1d1d}
 #toast.info{background:#eff6ff;border:1px solid #bfdbfe;color:#1e3a8a}
 
+/* ── GOVERNANCE / PROPOSALS ── */
+.prop-badge{display:inline-flex;align-items:center;gap:4px;padding:2px 8px;border-radius:20px;font-size:10px;font-weight:600;background:#fef3c7;color:#92400e;border:1px solid #fcd34d}
+.prop-badge.pending{background:#eff6ff;color:#1e40af;border-color:#bfdbfe}
+.prop-badge.approved{background:#f0fdf4;color:#166534;border-color:#bbf7d0}
+.prop-badge.rejected{background:#fff1f2;color:#9f1239;border-color:#fecdd3}
+#gov-modal{display:none;position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:110;align-items:flex-end;justify-content:center;padding:0;backdrop-filter:blur(4px)}
+#gov-modal.open{display:flex}
+#gov-sheet{background:#fff;border-radius:18px 18px 0 0;padding:20px;max-width:560px;width:100%;max-height:85vh;overflow-y:auto;box-shadow:0 -8px 30px rgba(0,0,0,.12)}
+.gov-title{font-family:'Playfair Display',serif;font-size:19px;color:#0f172a;margin-bottom:4px}
+.gov-sub{font-size:12px;color:#78563a;margin-bottom:16px;line-height:1.5}
+.gov-tabs{display:flex;gap:4px;margin-bottom:16px;border-bottom:1px solid #f0e8dc;padding-bottom:10px}
+.gov-tab{padding:6px 14px;border-radius:7px;font-size:12px;cursor:pointer;border:none;background:transparent;font-family:inherit;color:#a8906c;font-weight:500;transition:all .15s}
+.gov-tab.active{background:#f0fdf4;color:#16a34a;font-weight:600}
+.gov-item{border:1px solid #e8ddd0;border-radius:10px;padding:12px;margin-bottom:8px;background:#fff}
+.gov-item-head{display:flex;align-items:flex-start;justify-content:space-between;gap:8px;margin-bottom:6px}
+.gov-item-title{font-size:13px;font-weight:500;color:#1e293b;flex:1}
+.gov-item-time{font-size:10px;color:#c4a882;white-space:nowrap}
+.gov-item-body{font-size:12px;color:#78563a;margin-bottom:8px;line-height:1.5}
+.gov-item-actions{display:flex;gap:6px}
+.gov-btn{border:1.5px solid;border-radius:7px;padding:5px 12px;font-size:11.5px;cursor:pointer;font-family:inherit;font-weight:500;transition:all .15s}
+.gov-btn.approve{border-color:#16a34a;color:#16a34a;background:#f0fdf4}
+.gov-btn.approve:hover{background:#16a34a;color:#fff}
+.gov-btn.reject{border-color:#dc2626;color:#dc2626;background:#fff1f2}
+.gov-btn.reject:hover{background:#dc2626;color:#fff}
+.gov-btn.restore{border-color:#3b82f6;color:#3b82f6;background:#eff6ff}
+.gov-btn.restore:hover{background:#3b82f6;color:#fff}
+.gov-empty{text-align:center;padding:24px;color:#c4a882;font-size:13px}
+.gov-role-badge{display:inline-flex;align-items:center;gap:4px;padding:2px 8px;border-radius:20px;font-size:10px;font-weight:600}
+.gov-role-badge.admin{background:#fef3c7;color:#92400e;border:1px solid #fcd34d}
+.gov-role-badge.user{background:#f0fdf4;color:#166534;border:1px solid #bbf7d0}
 /* ── SHARE MODAL ── */
 #share-modal{display:none;position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:110;align-items:center;justify-content:center;padding:16px;backdrop-filter:blur(6px)}
 #share-modal.open{display:flex}
@@ -556,6 +586,7 @@ textarea{resize:none;height:72px;line-height:1.5}
    <span id="sync-lbl">Sin conectar</span>
   </div>
   <div style="width:1px;height:20px;background:#e8ddd0;margin:0 3px;flex-shrink:0"></div>
+  <button class="hb" onclick="openGov()" title="Control de cambios" style="position:relative">🛡 <span id="gov-notif" style="display:none;position:absolute;top:-3px;right:-3px;width:8px;height:8px;border-radius:50%;background:#ef4444"></span></button>
   <button class="hb" onclick="openPDF()" title="Descargar árbol familiar en PDF">
    <svg width="12" height="12" viewBox="0 0 16 16" fill="none" style="vertical-align:middle;margin-right:4px"><path d="M8 1v8M5 6l3 3 3-3" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/><path d="M2 11v2a1 1 0 001 1h10a1 1 0 001-1v-2" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>PDF
   </button>
@@ -645,6 +676,24 @@ textarea{resize:none;height:72px;line-height:1.5}
 <div id="act"></div>
 <div id="toast"></div>
 <div id="magic-toast" class="magic-toast"><div class="magic-toast-name" id="mt-name"></div><div class="magic-toast-sub" id="mt-sub"></div><div class="magic-toast-actions" id="mt-actions"></div></div>
+
+<!-- GOVERNANCE MODAL -->
+<div id="gov-modal" onclick="if(event.target===this)closeGov()">
+ <div id="gov-sheet">
+  <div style="width:36px;height:4px;background:#e2d5c3;border-radius:2px;margin:0 auto 14px;cursor:pointer" onclick="closeGov()"></div>
+  <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:4px">
+   <div class="gov-title">🛡 Control de cambios</div>
+   <div id="gov-role-display"></div>
+  </div>
+  <div class="gov-sub">Historial, propuestas pendientes y protección de la red familiar</div>
+  <div class="gov-tabs">
+   <button class="gov-tab active" onclick="govTab('pending')">Pendientes <span id="gov-pending-count"></span></button>
+   <button class="gov-tab" onclick="govTab('history')">Historial</button>
+   <button class="gov-tab" onclick="govTab('deleted')">Eliminados</button>
+  </div>
+  <div id="gov-content"></div>
+ </div>
+</div>
 
 <!-- SHARE MODAL -->
 <div id="share-modal" onclick="if(event.target===this)closeShare()">
@@ -789,7 +838,7 @@ function wouldCycle(rels,from,to){const ch={};rels.filter(r=>r.type==='parent'||
 function numGens(){const gm=computeGens();if(!gm.size)return 1;const v=[...gm.values()];return Math.max(...v)-Math.min(...v)+1;}
 
 function computeGens(){
-  const gm=new Map();const start=persons.find(p=>p.id==='me')?.id||persons[0]?.id;
+  const gm=new Map();const start=viewerId||(persons.find(p=>p.id==='me')?.id)||persons[0]?.id;
   if(!start)return gm;gm.set(start,0);const q=[{id:start,g:0}];const vis=new Set([start]);
   while(q.length){const{id,g}=q.shift();for(const r of relations){let nid=null,ng=null;
     if(r.type==='partner'){if(r.source===id&&!vis.has(r.target)){nid=r.target;ng=g}else if(r.target===id&&!vis.has(r.source)){nid=r.source;ng=g}}
@@ -858,10 +907,14 @@ function setViewer(pid){
   if(!p)return;
   viewerId=pid;
   try{localStorage.setItem(VK,pid)}catch(e){}
-  updateGraph(); // re-render with new gold ring
+  // Full reinit so generation bands recalculate from new viewer
+  d3Nodes=[];
+  initGraph();
   updateViewerBadge();
-  showProfile(p);
-  toast(`Ahora ves la red desde tu perspectiva ✓`,'ok');}
+  setTimeout(()=>{
+    showProfile(p);
+    toast(`Ahora ves la red desde la perspectiva de ${p.firstName} ✓`,'ok');
+  },300);}
 
 function updateViewerBadge(){
   const p=persons.find(x=>x.id===viewerId);
@@ -1043,7 +1096,7 @@ function updateStats(){
   document.getElementById('st-p').textContent=persons.length;document.getElementById('st-f').textContent=f;document.getElementById('st-h').textContent=h;
   document.getElementById('logo-st').textContent=`${ng} generación${ng!==1?'es':''} · ${persons.length} familiares`;
   // Show creator name from 'me' node if it has a real name
-  const meNode=persons.find(p=>p.id==='me');
+  const meNode=persons.find(p=>p.id===viewerId)||persons.find(p=>p.id==='me');
   const creatorEl=document.getElementById('logo-creator');
   const creatorNm=document.getElementById('creator-name');
   if(meNode&&creatorEl&&creatorNm){
@@ -1434,7 +1487,7 @@ function updateGraph(){
   ndE.append('text').attr('class','nd-nm').attr('text-anchor','middle').attr('y',RN+14).attr('font-size','9.5').attr('pointer-events','none').style('font-family','DM Sans,sans-serif');
   ndE.append('text').attr('class','nd-yr').attr('text-anchor','middle').attr('y',RN+24).attr('font-size','8.5').attr('fill','#a8906c').attr('pointer-events','none').style('font-family','DM Sans,sans-serif');
   const ndA=ndE.merge(nd);
-  ndA.select('.nd-base').attr('fill',d=>nStyle(d).fill).attr('stroke',d=>nStyle(d).border).attr('stroke-width',d=>d.id==='me'?2.5:1.5);
+  ndA.select('.nd-base').attr('fill',d=>nStyle(d).fill).attr('stroke',d=>nStyle(d).border).attr('stroke-width',d=>d.id===viewerId?2.5:1.5);
   ndA.select('.nd-arc').attr('stroke',d=>nStyle(d).ring).attr('stroke-dasharray',d=>{const c=compl(d);return`${CIRC*c/100} ${CIRC*(1-c/100)}`});
   ndA.select('.nd-ph').attr('clip-path',d=>`url(#phc-${d.id})`).attr('href',d=>d.photo||'').attr('display',d=>d.photo?'block':'none');
   ndA.select('.nd-in').text(d=>initials(d)).attr('fill',d=>nStyle(d).text).attr('display',d=>d.photo?'none':'block');
@@ -1467,11 +1520,10 @@ function deleteRel(rid){
   const typeLabel={parent:'parentesco',partner:'pareja',adopted:'adopción'};
   const msg=`¿Eliminar el vínculo de ${typeLabel[r.type]||r.type} entre ${fullName(pa)||'?'} y ${fullName(pb)||'?'}?`;
   const relId=rid;
-  showConfirm('Eliminar vínculo',msg,
-    `function(){relations=relations.filter(x=>x.id!=='${relId}');save();if(selectedId){const p=persons.find(x=>x.id===selectedId);if(p){updateGraph();showProfile(p);return;}}updateGraph();toast('Vínculo eliminado');}`,
+  showConfirm('Eliminar vínculo',msg+`<br><small style="color:#a8906c">Puedes restaurarlo desde 🛡 Control de cambios</small>`,
+    `function(){softDeleteRelation('${relId}');}`,
     null,'Eliminar','Cancelar','danger');
   return;
-  relations=relations.filter(x=>x.id!==rid);
   save();
   if(selectedId){const p=persons.find(x=>x.id===selectedId);if(p){updateGraph();showProfile(p);return;}}
   updateGraph();
@@ -1479,7 +1531,7 @@ function deleteRel(rid){
 
 function showProfile(p){selectedId=p.id;renderHL();openPanel('profile',p);}
 function profileHTML(p){
-  const rel=p.id!=='me'?findRel(viewerId,p.id):null;
+  const rel=p.id!==viewerId?findRel(viewerId,p.id):null;
   const sc=SC[p.status]||SC.unverified,c=compl(p),miss=missingTop(p),ns=nStyle(p);
   const conns=relations.filter(r=>r.source===p.id||r.target===p.id).map(r=>{const oid=r.source===p.id?r.target:r.source,other=persons.find(x=>x.id===oid);return{other,lbl:connLabel(r,p,other),relId:r.id}}).filter(x=>x.other);
   const sibs=getSiblings(p.id),grandkids=getGrandchildren(p.id),ggkids=getGreatGrandchildren(p.id),gparents=getGrandparents(p.id),ggparents=getGreatGrandparents(p.id);
@@ -1545,7 +1597,9 @@ function _doAddPerson(){
   const fn=document.getElementById('pf-fn')?.value?.trim();
   if(!fn)return;
   const p={id:uid(),firstName:fn,lastName:document.getElementById('pf-ln')?.value?.trim()||'',gender:document.getElementById('pf-gn')?.value||'unknown',birthDate:document.getElementById('pf-bd')?.value||'',deathDate:document.getElementById('pf-dd')?.value||'',location:document.getElementById('pf-lo')?.value?.trim()||'',story:document.getElementById('pf-st2')?.value?.trim()||'',photo:document.getElementById('pf-ph')?.value||null,status:document.getElementById('pf-st')?.value||'unverified',notes:''};
-  persons.push(p);save();updateGraph();closePanel();addActivity(p.firstName,'se unió al árbol');setTimeout(()=>{showMagicMoment(p,null);},400);}
+  persons.push(p);save();updateGraph();closePanel();
+  logChange('add_person',p,`${p.firstName} ${p.lastName} agregado/a`);
+  addActivity(p.firstName,'se unió al árbol');setTimeout(()=>{showMagicMoment(p,null);},400);}
 
 function addPerson(){
   const fn=document.getElementById('pf-fn')?.value?.trim();
@@ -1559,13 +1613,14 @@ function addPerson(){
       '_doAddPerson',null,'Sí, es diferente','Cancelar');
     return;}
   _doAddPerson();}
-function savePerson(id){const fn=document.getElementById('pf-fn')?.value?.trim();if(!fn){toast('Nombre obligatorio','err');return;}const idx=persons.findIndex(p=>p.id===id);if(idx<0)return;persons[idx]={...persons[idx],firstName:fn,lastName:document.getElementById('pf-ln')?.value?.trim()||'',gender:document.getElementById('pf-gn')?.value||'unknown',birthDate:document.getElementById('pf-bd')?.value||'',deathDate:document.getElementById('pf-dd')?.value||'',location:document.getElementById('pf-lo')?.value?.trim()||'',story:document.getElementById('pf-st2')?.value?.trim()||'',photo:document.getElementById('pf-ph')?.value||persons[idx].photo||null,status:document.getElementById('pf-st')?.value||'unverified'};save();updateGraph();showProfile(persons[idx]);toast('Guardado ✓');}
+function savePerson(id){const fn=document.getElementById('pf-fn')?.value?.trim();if(!fn){toast('Nombre obligatorio','err');return;}const idx=persons.findIndex(p=>p.id===id);if(idx<0)return;persons[idx]={...persons[idx],firstName:fn,lastName:document.getElementById('pf-ln')?.value?.trim()||'',gender:document.getElementById('pf-gn')?.value||'unknown',birthDate:document.getElementById('pf-bd')?.value||'',deathDate:document.getElementById('pf-dd')?.value||'',location:document.getElementById('pf-lo')?.value?.trim()||'',story:document.getElementById('pf-st2')?.value?.trim()||'',photo:document.getElementById('pf-ph')?.value||persons[idx].photo||null,status:document.getElementById('pf-st')?.value||'unverified'};logChange('edit_person',persons[idx],`Perfil de ${persons[idx].firstName} editado`);
+  save();updateGraph();showProfile(persons[idx]);toast('Guardado ✓');}
 function delPerson(id){
   const p=persons.find(x=>x.id===id);
   showConfirm(
     'Eliminar persona',
-    `¿Eliminar a <strong>${p?fullName(p):'esta persona'}</strong>? También se borran todos sus vínculos.`,
-    `function(){persons=persons.filter(x=>x.id!=='${id}');relations=relations.filter(r=>r.source!=='${id}'&&r.target!=='${id}');save();selectedId=null;closePanel();updateGraph();toast('Eliminado');}`,
+    `¿Eliminar a <strong>${p?fullName(p):'esta persona'}</strong>?<br><small style="color:#a8906c">Quedará guardado y puedes restaurarlo desde 🛡 Control de cambios</small>`,
+    `function(){softDeletePerson('${id}');}`,
     null,'Eliminar','Cancelar','danger');}
 
 // ── Relation form ──
@@ -1588,7 +1643,10 @@ function relFormHTML(){const opts=persons.map(p=>`<option value="${p.id}">${full
   ${relList?`<div class="conn-hd" style="margin-top:16px">Vínculos recientes — toca × para eliminar</div>${relList}`:''}
   `;}
 function prevRel(){const a=document.getElementById('ra')?.value,b=document.getElementById('rb')?.value,t=document.getElementById('rt')?.value,el=document.getElementById('rpv');if(!el)return;if(a&&b&&a!==b){const pa=persons.find(p=>p.id===a),pb=persons.find(p=>p.id===b);const tl={parent:'es padre/madre de',partner:'es pareja de',adopted:'es padre adoptivo de'};el.innerHTML=`<div class="rel-prev">${fullName(pa)} <strong>${tl[t]||t}</strong> ${fullName(pb)}</div>`}else el.innerHTML='';}
-function addRel(){const s=document.getElementById('ra')?.value,t=document.getElementById('rb')?.value,type=document.getElementById('rt')?.value;if(!s||!t){toast('Selecciona ambas personas','err');return;}if(s===t){toast('No puedes conectar a alguien consigo mismo','err');return;}if(isDupe(s,t)){toast('Este vínculo ya existe','err');return;}if(['parent','adopted'].includes(type)&&wouldCycle(relations,s,t)){toast('Ciclo genealógico imposible','err');return;}relations.push({id:uid(),source:s,target:t,type});save();updateGraph();closePanel();toast('Vínculo creado ✓');}
+function addRel(){const s=document.getElementById('ra')?.value,t=document.getElementById('rb')?.value,type=document.getElementById('rt')?.value;if(!s||!t){toast('Selecciona ambas personas','err');return;}if(s===t){toast('No puedes conectar a alguien consigo mismo','err');return;}if(isDupe(s,t)){toast('Este vínculo ya existe','err');return;}if(['parent','adopted'].includes(type)&&wouldCycle(relations,s,t)){toast('Ciclo genealógico imposible','err');return;}const newRel={id:uid(),source:s,target:t,type};
+  relations.push(newRel);
+  logChange('add_relation',newRel,`Vínculo creado entre ${fullName(persons.find(p=>p.id===s)||{})} y ${fullName(persons.find(p=>p.id===t)||{})}`);
+  save();updateGraph();closePanel();toast('Vínculo creado ✓');}
 
 // ── Add Relative contextual ──
 let _arCtx=null;
@@ -1600,7 +1658,7 @@ function submitAR(){if(!_arCtx)return;const{pid,type,cfg}=_arCtx;const fn=docume
 // ══════ LINEAGE DETECTION ══════
 // Correct algorithm:
 // - Blood lineage traced ONLY through parent/adopted links
-// - Go UP to find ancestors, go DOWN (excluding 'me') to find cousins/nephews
+// - Go UP to find ancestors, go DOWN (excluding viewer) to find cousins/nephews
 // - Partners of blood relatives = political relatives (no blood)
 
 function getAncestors(startId){
@@ -1651,7 +1709,7 @@ function getLineage(pid){
   const dadAnc=getAncestors(dadId); // dad + his parents + grandparents...
   const momAnc=getAncestors(momId);
 
-  // Step 2: descendants of each side (excluding 'me' so we don't cross to other side)
+  // Step 2: descendants of each side (excluding viewer so we don't cross to other side)
   const dadDesc=getDescendants(dadId, meId); // dad's children (Juan Carlos etc) excluding me's branch
   const momDesc=getDescendants(momId, meId);
 
@@ -1788,6 +1846,238 @@ function openPDF(){
 // ── Export / Import ──
 function exportData(){const data=JSON.stringify({persons,relations,exportedAt:new Date().toISOString()},null,2);const blob=new Blob([data],{type:'application/json'});const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='raices-familia.json';a.click();toast('Exportado ✓','info');}
 function importData(ev){const f=ev.target.files[0];if(!f)return;const reader=new FileReader();reader.onload=e=>{try{const d=JSON.parse(e.target.result);if(!d.persons||!d.relations)throw new Error();persons=d.persons;relations=d.relations;try{localStorage.setItem(SK,JSON.stringify({persons,relations}))}catch(e){}d3Nodes=[];initGraph();toast(`${persons.length} personas importadas ✓`,'info');}catch{toast('Archivo no válido','err');}};reader.readAsText(f);ev.target.value='';}
+
+// ══════════════════════════════════════════════════
+// GOVERNANCE SYSTEM
+// Roles, change history, soft delete, proposals
+// ══════════════════════════════════════════════════
+
+const GOV_KEY='raices_gov'; // localStorage for offline cache
+let _changelog=[]; // {id, type, actorId, actorName, data, ts, status}
+let _deleted=[];   // soft-deleted persons/relations
+let _proposals=[];  // pending relation proposals
+let _isAdmin=false;
+let _govTab='pending';
+
+// ── Admin detection: first viewer to connect Firebase is admin ──
+function detectAdmin(){
+  try{
+    const adminKey='raices_admin_'+( typeof firebase!=='undefined'&&firebase.apps.length
+      ? firebase.app().options.projectId : 'local');
+    const stored=localStorage.getItem(adminKey);
+    if(stored===viewerId){_isAdmin=true;return;}
+    if(!stored&&viewerId&&viewerId!=='me'){
+      // First real user to open = admin
+      localStorage.setItem(adminKey,viewerId);
+      _isAdmin=true;
+    }
+  }catch(e){}
+}
+
+// ── Log a change ──
+function logChange(type, data, description){
+  const actor=persons.find(p=>p.id===viewerId);
+  const entry={
+    id:uid(),
+    type, // 'add_person','edit_person','add_relation','delete_person','delete_relation','propose_relation'
+    actorId:viewerId,
+    actorName:actor?fullName(actor):'Desconocido',
+    description,
+    data:JSON.parse(JSON.stringify(data)), // deep copy
+    ts:new Date().toISOString(),
+    status:'done' // 'done','pending','approved','rejected'
+  };
+  _changelog.unshift(entry);
+  if(_changelog.length>200)_changelog=_changelog.slice(0,200);
+  saveGov();
+  updateGovNotif();
+  return entry;}
+
+// ── Soft delete — never permanently remove ──
+function softDeletePerson(pid){
+  const p=persons.find(x=>x.id===pid);
+  if(!p)return;
+  const rels=relations.filter(r=>r.source===pid||r.target===pid);
+  _deleted.push({type:'person',data:{...p},relations:rels,ts:new Date().toISOString(),deletedBy:viewerId});
+  logChange('delete_person',{person:p,relations:rels},`${fullName(p)} marcado como eliminado`);
+  // Actually remove from active data
+  persons=persons.filter(x=>x.id!==pid);
+  relations=relations.filter(r=>r.source!==pid&&r.target!==pid);
+  save();selectedId=null;closePanel();updateGraph();
+  toast(`${p.firstName} eliminado. Puedes restaurarlo desde 🛡 Control de cambios`,'info');}
+
+function softDeleteRelation(rid){
+  const r=relations.find(x=>x.id===rid);
+  if(!r)return;
+  const pa=persons.find(x=>x.id===r.source),pb=persons.find(x=>x.id===r.target);
+  _deleted.push({type:'relation',data:{...r},ts:new Date().toISOString(),deletedBy:viewerId});
+  logChange('delete_relation',{relation:r},`Vínculo entre ${fullName(pa)||'?'} y ${fullName(pb)||'?'} eliminado`);
+  relations=relations.filter(x=>x.id!==rid);
+  save();
+  if(selectedId){const p=persons.find(x=>x.id===selectedId);if(p){updateGraph();showProfile(p);return;}}
+  updateGraph();
+  toast('Vínculo eliminado. Puedes restaurarlo desde 🛡','info');}
+
+// ── Propose a relation (non-admin users) ──
+function proposeRelation(srcId,tgtId,type){
+  const pa=persons.find(p=>p.id===srcId),pb=persons.find(p=>p.id===tgtId);
+  if(!pa||!pb)return;
+  if(isDupe(srcId,tgtId)){toast('Este vínculo ya existe','err');return;}
+  const prop={
+    id:uid(),type:'propose_relation',
+    actorId:viewerId,actorName:fullName(persons.find(p=>p.id===viewerId)||{}),
+    description:`Propone vínculo: ${fullName(pa)} → ${fullName(pb)} (${type})`,
+    data:{source:srcId,target:tgtId,relType:type},
+    ts:new Date().toISOString(),status:'pending'};
+  _proposals.unshift(prop);
+  saveGov();updateGovNotif();
+  toast('Propuesta enviada — el administrador la revisará ✓','info');}
+
+// ── Restore deleted ──
+function restoreDeleted(idx){
+  const item=_deleted[idx];if(!item)return;
+  if(item.type==='person'){
+    persons.push(item.data);
+    if(item.relations)item.relations.forEach(r=>relations.push(r));
+    logChange('restore',item.data,`${fullName(item.data)} restaurado`);
+  } else if(item.type==='relation'){
+    relations.push(item.data);
+    logChange('restore',item.data,'Vínculo restaurado');
+  }
+  _deleted.splice(idx,1);
+  saveGov();save();updateGraph();
+  toast('Restaurado ✓','ok');
+  govRenderContent();}
+
+// ── Approve/reject proposal ──
+function approveProposal(pid){
+  const prop=_proposals.find(p=>p.id===pid);if(!prop)return;
+  const{source,target,relType}=prop.data;
+  if(!isDupe(source,target)&&!wouldCycle(relations,source,target)){
+    relations.push({id:uid(),source,target,type:relType});
+    save();updateGraph();
+  }
+  prop.status='approved';
+  _changelog.unshift({...prop,status:'approved',approvedBy:viewerId,approvedTs:new Date().toISOString()});
+  _proposals=_proposals.filter(p=>p.id!==pid);
+  saveGov();updateGovNotif();
+  toast('Propuesta aprobada ✓','ok');
+  govRenderContent();}
+
+function rejectProposal(pid){
+  const prop=_proposals.find(p=>p.id===pid);if(!prop)return;
+  prop.status='rejected';
+  _changelog.unshift({...prop,status:'rejected'});
+  _proposals=_proposals.filter(p=>p.id!==pid);
+  saveGov();updateGovNotif();
+  toast('Propuesta rechazada','info');
+  govRenderContent();}
+
+// ── Persist ──
+function saveGov(){
+  try{localStorage.setItem(GOV_KEY,JSON.stringify({changelog:_changelog,deleted:_deleted,proposals:_proposals}))}catch(e){}
+  // Sync to Firebase if connected
+  if(typeof firebase!=='undefined'&&firebase.apps.length){
+    try{
+      firebase.firestore().collection('raices').doc('governance')
+        .set({changelog:_changelog.slice(0,50),deleted:_deleted,proposals:_proposals,updatedAt:new Date().toISOString()})
+        .catch(()=>{});
+    }catch(e){}
+  }}
+
+function loadGov(){
+  try{
+    const d=JSON.parse(localStorage.getItem(GOV_KEY)||'{}');
+    _changelog=d.changelog||[];_deleted=d.deleted||[];_proposals=d.proposals||[];
+  }catch(e){}
+  // Try Firebase
+  if(typeof firebase!=='undefined'&&firebase.apps.length){
+    firebase.firestore().collection('raices').doc('governance').get()
+      .then(snap=>{if(snap.exists){const d=snap.data();
+        if(d.changelog)_changelog=d.changelog;
+        if(d.deleted)_deleted=d.deleted;
+        if(d.proposals)_proposals=d.proposals;
+        updateGovNotif();}})
+      .catch(()=>{});
+  }}
+
+function updateGovNotif(){
+  const n=document.getElementById('gov-notif');
+  if(n)n.style.display=_proposals.length>0?'block':'none';
+  const cnt=document.getElementById('gov-pending-count');
+  if(cnt)cnt.textContent=_proposals.length>0?`(${_proposals.length})`:'';
+}
+
+// ── UI ──
+function openGov(){
+  detectAdmin();loadGov();
+  const roleEl=document.getElementById('gov-role-display');
+  if(roleEl)roleEl.innerHTML=`<span class="gov-role-badge ${_isAdmin?'admin':'user'}">${_isAdmin?'👑 Administrador':'👤 Usuario'}</span>`;
+  govTab('pending');
+  document.getElementById('gov-modal').classList.add('open');}
+function closeGov(){document.getElementById('gov-modal').classList.remove('open');}
+
+function govTab(tab){
+  _govTab=tab;
+  document.querySelectorAll('.gov-tab').forEach((t,i)=>{
+    t.classList.toggle('active',['pending','history','deleted'][i]===tab);});
+  govRenderContent();}
+
+function govRenderContent(){
+  const el=document.getElementById('gov-content');if(!el)return;
+  if(_govTab==='pending') el.innerHTML=govRenderPending();
+  else if(_govTab==='history') el.innerHTML=govRenderHistory();
+  else if(_govTab==='deleted') el.innerHTML=govRenderDeleted();}
+
+function govTimeAgo(ts){
+  const d=Math.floor((Date.now()-new Date(ts))/1000);
+  if(d<60)return'ahora mismo';
+  if(d<3600)return`hace ${Math.floor(d/60)} min`;
+  if(d<86400)return`hace ${Math.floor(d/3600)} h`;
+  return`hace ${Math.floor(d/86400)} días`;}
+
+function govRenderPending(){
+  if(!_proposals.length)return`<div class="gov-empty">✓ Sin propuestas pendientes</div>`;
+  return _proposals.map(p=>`
+    <div class="gov-item">
+      <div class="gov-item-head">
+        <div class="gov-item-title">${p.description}</div>
+        <div class="gov-item-time">${govTimeAgo(p.ts)}</div>
+      </div>
+      <div class="gov-item-body">Por: ${p.actorName}</div>
+      ${_isAdmin?`<div class="gov-item-actions">
+        <button class="gov-btn approve" onclick="approveProposal('${p.id}')">✓ Aprobar</button>
+        <button class="gov-btn reject" onclick="rejectProposal('${p.id}')">✗ Rechazar</button>
+      </div>`:`<div style="font-size:11px;color:#c4a882">Pendiente de aprobación del administrador</div>`}
+    </div>`).join('');}
+
+function govRenderHistory(){
+  if(!_changelog.length)return`<div class="gov-empty">Sin cambios registrados aún</div>`;
+  return _changelog.slice(0,30).map(e=>`
+    <div class="gov-item" style="opacity:${e.status==='rejected'?.5:1}">
+      <div class="gov-item-head">
+        <div class="gov-item-title">${e.description||e.type}</div>
+        <div style="display:flex;align-items:center;gap:6px">
+          <span class="prop-badge ${e.status||'done'}">${{done:'Hecho',approved:'Aprobado',rejected:'Rechazado',pending:'Pendiente'}[e.status]||e.status}</span>
+          <span class="gov-item-time">${govTimeAgo(e.ts)}</span>
+        </div>
+      </div>
+      <div class="gov-item-body">Por: ${e.actorName||'Sistema'}</div>
+    </div>`).join('');}
+
+function govRenderDeleted(){
+  if(!_deleted.length)return`<div class="gov-empty">Sin elementos eliminados</div>`;
+  return _deleted.map((item,i)=>`
+    <div class="gov-item">
+      <div class="gov-item-head">
+        <div class="gov-item-title">${item.type==='person'?fullName(item.data):'Vínculo eliminado'}</div>
+        <div class="gov-item-time">${govTimeAgo(item.ts)}</div>
+      </div>
+      <div class="gov-item-body">${item.type==='person'?`Persona · ${item.relations?.length||0} vínculos asociados`:'Relación entre familiares'}</div>
+      ${_isAdmin?`<div class="gov-item-actions"><button class="gov-btn restore" onclick="restoreDeleted(${i})">↩ Restaurar</button></div>`:''}
+    </div>`).join('');}
+
+
 
 // ══════ SHARE / INVITE ══════
 function openShare(){
@@ -1936,11 +2226,18 @@ window.addEventListener('resize',()=>{
 
 // ── Init ──
 load();
+loadGov();
 // Load viewer identity (who is viewing from this browser)
 try{
   const sv=localStorage.getItem(VK);
-  if(sv&&persons.find(p=>p.id===sv))viewerId=sv;
-  else viewerId=persons.find(p=>p.id==='me')?'me':(persons[0]?.id||'me');
+  if(sv&&persons.find(p=>p.id===sv)){
+    viewerId=sv;
+  } else {
+    // Default: 'me' seed node if it has a real name, otherwise first person
+    const meNode=persons.find(p=>p.id==='me');
+    const meHasName=meNode&&meNode.firstName&&meNode.firstName!=='Yo'&&!meNode.firstName.includes('apellido');
+    viewerId=meHasName?'me':(persons[0]?.id||'me');
+  }
 }catch(e){}
 // Apply hoy collapsed state
 if(_hoyCollapsed){
@@ -2066,7 +2363,7 @@ function openGEDCOMPicker(){
     const r=new FileReader();
     r.onload=ev=>importGEDCOM(ev.target.result);
     r.readAsText(f,'utf-8');};inp.click();}
-window.openGEDCOMPicker=openGEDCOMPicker;window.openShare=openShare;window.closeShare=closeShare;window.copyShareLink=copyShareLink;window.shareWhatsApp=shareWhatsApp;window.exportDataAndClose=exportDataAndClose;window.adjustBodyTop=adjustBodyTop;window.setViewer=setViewer;window.updateViewerBadge=updateViewerBadge;window.setLayout=setLayout;window.applyTreeLayout=applyTreeLayout;
+window.openGEDCOMPicker=openGEDCOMPicker;window.openShare=openShare;window.openGov=openGov;window.closeGov=closeGov;window.govTab=govTab;window.approveProposal=approveProposal;window.rejectProposal=rejectProposal;window.restoreDeleted=restoreDeleted;window.softDeletePerson=softDeletePerson;window.softDeleteRelation=softDeleteRelation;window.closeShare=closeShare;window.copyShareLink=copyShareLink;window.shareWhatsApp=shareWhatsApp;window.exportDataAndClose=exportDataAndClose;window.adjustBodyTop=adjustBodyTop;window.setViewer=setViewer;window.updateViewerBadge=updateViewerBadge;window.setLayout=setLayout;window.applyTreeLayout=applyTreeLayout;
 </script>
 </body>
 </html>
