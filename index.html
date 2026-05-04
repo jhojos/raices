@@ -240,12 +240,21 @@ textarea{resize:none;height:72px;line-height:1.5}
   #logo-creator{display:none!important}
   #layout-toggle{bottom:10px;right:10px}
   #legend{display:none!important}
+  #ctx-ctrl{display:none!important}
 }
 @media(min-width:681px){
   #mob-hd-right{display:none!important}
 }
 #mob-hd-right{display:none;align-items:center;gap:8px;flex-shrink:0}
 #mob-stats{font-size:10.5px;color:#a8906c;white-space:nowrap;background:#f9f5f0;border-radius:20px;padding:3px 9px;border:1px solid #e8ddd0}
+/* ── CONTEXT DEPTH CONTROL ── */
+#ctx-ctrl{position:fixed;bottom:14px;left:50%;transform:translateX(-50%);display:flex;align-items:center;gap:6px;background:rgba(255,252,247,.97);border:1px solid #e2d5c3;border-radius:12px;padding:6px 10px;box-shadow:0 2px 12px rgba(0,0,0,.08);z-index:10}
+.ctx-btn{border:none;background:transparent;color:#78563a;padding:5px 10px;border-radius:7px;font-size:12px;cursor:pointer;font-family:inherit;font-weight:500;transition:all .15s;white-space:nowrap}
+.ctx-btn:hover{background:#f0e8dc}
+.ctx-btn.active{background:#f0fdf4;color:#16a34a;font-weight:600}
+#ctx-label{font-size:11px;color:#c4a882;padding:0 4px;border-left:1px solid #e8ddd0;border-right:1px solid #e8ddd0;margin:0 2px;white-space:nowrap}
+#ctx-show-all{font-size:11px;color:#a8906c;cursor:pointer;padding:4px 8px;border-radius:6px;background:none;border:1px solid #e2d5c3;font-family:inherit;transition:all .15s}
+#ctx-show-all:hover{background:#f5ede0}
 #layout-toggle{position:fixed;bottom:14px;right:14px;display:flex;background:rgba(255,252,247,.95);border:1px solid #e2d5c3;border-radius:9px;overflow:hidden;box-shadow:0 2px 10px rgba(0,0,0,.08);z-index:10}
 .lt-btn{border:none;background:transparent;color:#a8906c;padding:7px 13px;font-size:11px;cursor:pointer;font-family:inherit;font-weight:500;transition:all .15s;display:flex;align-items:center;gap:5px}
 .lt-btn:hover{color:#78563a;background:#f5ede0}
@@ -631,6 +640,15 @@ textarea{resize:none;height:72px;line-height:1.5}
   <div id="panel-drag" onclick="closePanel()"><div id="panel-drag-bar"></div></div>
   <div id="pnl-in"></div>
  </div>
+  <!-- CONTEXT DEPTH CONTROL -->
+  <div id="ctx-ctrl">
+   <button class="ctx-btn" onclick="setCtxDepth(1)" id="ctx-d1">Yo + padres</button>
+   <button class="ctx-btn active" onclick="setCtxDepth(2)" id="ctx-d2">2 generaciones</button>
+   <button class="ctx-btn" onclick="setCtxDepth(3)" id="ctx-d3">3 generaciones</button>
+   <span id="ctx-label">de <span id="ctx-total">0</span></span>
+   <button id="ctx-show-all" onclick="setCtxDepth(99)">Ver todos</button>
+  </div>
+
   <!-- LAYOUT TOGGLE -->
   <div id="layout-toggle">
     <button class="lt-btn active" id="lt-force" onclick="setLayout('force')" title="Vista de red">
@@ -788,6 +806,13 @@ textarea{resize:none;height:72px;line-height:1.5}
    <div class="mob-item-ico" style="background:#f5f3ff;color:#8b5cf6">❓</div>
    <div><div class="mob-item-txt">Guía de uso</div><div class="mob-item-sub">Cómo usar Raíces</div></div>
   </div>
+  <div style="padding:8px 0 2px;font-size:10px;color:#c4a882;text-transform:uppercase;letter-spacing:.07em">Vista de la red</div>
+  <div style="display:flex;gap:6px;flex-wrap:wrap">
+   <button onclick="closeMobMenu();setCtxDepth(1)" style="flex:1;background:#f9f5f0;border:1px solid #e8ddd0;border-radius:8px;padding:8px;font-size:12px;color:#78563a;cursor:pointer;font-family:inherit">Yo + padres</button>
+   <button onclick="closeMobMenu();setCtxDepth(2)" style="flex:1;background:#f0fdf4;border:1px solid #bbf7d0;border-radius:8px;padding:8px;font-size:12px;color:#166534;cursor:pointer;font-family:inherit;font-weight:600">2 generaciones</button>
+   <button onclick="closeMobMenu();setCtxDepth(3)" style="flex:1;background:#f9f5f0;border:1px solid #e8ddd0;border-radius:8px;padding:8px;font-size:12px;color:#78563a;cursor:pointer;font-family:inherit">3 generaciones</button>
+   <button onclick="closeMobMenu();setCtxDepth(99)" style="flex:1;background:#f9f5f0;border:1px solid #e8ddd0;border-radius:8px;padding:8px;font-size:12px;color:#78563a;cursor:pointer;font-family:inherit">Ver todos</button>
+  </div>
  </div>
 </div>
 
@@ -912,12 +937,14 @@ function setViewer(pid){
   try{localStorage.setItem(VK,pid)}catch(e){}
   // Full reinit so generation bands recalculate from new viewer
   d3Nodes=[];
+  window._shouldCenter=true;
   initGraph();
   updateViewerBadge();
   setTimeout(()=>{
     showProfile(p);
+    centerOnViewer(true);
     toast(`Ahora ves la red desde la perspectiva de ${p.firstName} ✓`,'ok');
-  },300);}
+  },400);}
 
 function updateViewerBadge(){
   const p=persons.find(x=>x.id===viewerId);
@@ -1413,6 +1440,7 @@ function applyTreeLayout(){
     .attr('y2',d=>{const t=typeof d.target==='object'?d.target:d3Nodes.find(n=>n.id===d.target);return t?.y||0});}
 
 function initGraph(){
+  window._shouldCenter=true;
   const W=svgEl.parentElement.clientWidth||900,H=svgEl.parentElement.clientHeight||700;
   const svg=d3.select(svgEl).attr('width',W).attr('height',H);svg.selectAll('*').remove();
   const defs=svg.append('defs');
@@ -1444,14 +1472,82 @@ function initGraph(){
     .force('y',d3.forceY(d=>{const g=gm.get(d.id);return g!=null?genYs[g]||H/2:H/2}).strength(.9));
   updateGraph();}
 
+// ══════ CONTEXTUAL VIEW ══════
+let _ctxDepth=2; // generations up+down from viewer to show
+
+function setCtxDepth(d){
+  _ctxDepth=d;
+  // Update button states
+  [1,2,3].forEach(n=>{
+    const btn=document.getElementById('ctx-d'+n);
+    if(btn)btn.classList.toggle('active',n===d);
+  });
+  const allBtn=document.getElementById('ctx-show-all');
+  if(allBtn)allBtn.style.fontWeight=d===99?'700':'400';
+  d3Nodes=[];updateGraph();}
+
+function getContextNodes(depth){
+  if(depth>=99)return new Set(persons.map(p=>p.id));
+  const visible=new Set([viewerId]);
+  const queue=[{id:viewerId,gen:0}];
+  const visited=new Set([viewerId]);
+
+  while(queue.length){
+    const{id,gen}=queue.shift();
+    if(Math.abs(gen)>=depth)continue;
+    for(const r of relations){
+      let nid=null,ng=null;
+      if(r.type==='parent'||r.type==='adopted'){
+        if(r.target===id){nid=r.source;ng=gen-1;} // parent = one gen up
+        else if(r.source===id){nid=r.target;ng=gen+1;} // child = one gen down
+      }
+      if(r.type==='partner'){
+        if(r.source===id)nid=r.target;
+        else if(r.target===id)nid=r.source;
+        ng=gen;
+      }
+      if(nid&&!visited.has(nid)){
+        visited.add(nid);visible.add(nid);
+        queue.push({id:nid,gen:ng??gen});
+      }
+    }}
+
+  // Also include siblings (share a parent with viewer)
+  const viewerParents=relations
+    .filter(r=>(r.type==='parent'||r.type==='adopted')&&r.target===viewerId)
+    .map(r=>r.source);
+  viewerParents.forEach(pid=>{
+    relations
+      .filter(r=>(r.type==='parent'||r.type==='adopted')&&r.source===pid)
+      .forEach(r=>{if(!visited.has(r.target)){visited.add(r.target);visible.add(r.target);}});
+  });
+  return visible;}
+
+function updateCtxLabel(){
+  const visible=getContextNodes(_ctxDepth);
+  // Update DOM outside of render cycle
+  requestAnimationFrame(()=>{
+    const lbl=document.getElementById('ctx-label');
+    if(lbl)lbl.textContent=`${visible.size} de ${persons.length}`;
+  });
+  return visible;}
+
 let _updating=false;
 function updateGraph(){
   if(_updating)return;_updating=true;
   try{
   const svg=d3.select(svgEl),ll=svg.select('.root .ll'),nl=svg.select('.root .nl');
   const pos=new Map(d3Nodes.map(n=>[n.id,{x:n.x,y:n.y}]));
-  d3Nodes=persons.map(p=>({...p,x:pos.get(p.id)?.x,y:pos.get(p.id)?.y}));
-  const d3L=relations.map(r=>({...r}));
+  const _ctxVisible=updateCtxLabel();
+  // Fallback: if context filter yields nothing, show all persons
+  const _ctxFiltered=persons.filter(p=>_ctxVisible.has(p.id));
+  const _useAll=_ctxFiltered.length===0;
+  d3Nodes=(_useAll?persons:_ctxFiltered)
+    .map(p=>({...p,x:pos.get(p.id)?.x,y:pos.get(p.id)?.y}));
+  const d3L=(_useAll
+    ?relations
+    :relations.filter(r=>_ctxVisible.has(r.source)&&_ctxVisible.has(r.target))
+  ).map(r=>({...r}));
   const gm=computeGens(),W=svgEl.parentElement.clientWidth||900,H=svgEl.parentElement.clientHeight||700;
   const allG=[...new Set([...gm.values()])];
   if(allG.length){const minG=Math.min(...allG),numG=Math.max(...allG)-minG+1;const genYs={};for(let g=minG;g<=minG+numG-1;g++)genYs[g]=H*.08+H*.84*((g-minG)/numG)+H*.84/numG*.5;sim?.force('y',d3.forceY(d=>{const g=gm.get(d.id);return g!=null?genYs[g]||H/2:H/2}).strength(.9));}
@@ -1501,7 +1597,26 @@ function updateGraph(){
   sim.alpha(.4).restart();updateStats();
   // Re-apply tree layout if active
   if(layoutMode==='tree')setTimeout(applyTreeLayout,50);
+  // Auto-center only on first load or viewer change
+  if(window._shouldCenter){window._shouldCenter=false;setTimeout(()=>centerOnViewer(true),500);}
   }finally{_updating=false;}}
+
+function centerOnViewer(animate=true){
+  try{
+    const vn=d3Nodes.find(n=>n.id===viewerId);
+    if(!vn||!svgEl)return;
+    const W=svgEl.parentElement?.clientWidth||900;
+    const H=svgEl.parentElement?.clientHeight||700;
+    const root=d3.select(svgEl).select('.root');
+    if(!root.node())return;
+    const tx=W/2-(vn.x||0);
+    const ty=H/2-(vn.y||0);
+    if(animate){
+      root.transition().duration(500).attr('transform',`translate(${tx},${ty})`);
+    } else {
+      root.attr('transform',`translate(${tx},${ty})`);
+    }
+  }catch(e){}}
 
 function renderHL(){d3.select(svgEl).selectAll('.nd-base').attr('filter',d=>selectedId&&d.id===selectedId?`drop-shadow(0 0 8px ${nStyle(d).ring})`:'none');}
 
@@ -2440,7 +2555,7 @@ function openGEDCOMPicker(){
     const r=new FileReader();
     r.onload=ev=>importGEDCOM(ev.target.result);
     r.readAsText(f,'utf-8');};inp.click();}
-window.openGEDCOMPicker=openGEDCOMPicker;window.openShare=openShare;window.openGov=openGov;window.closeGov=closeGov;window.govTab=govTab;window.approveProposal=approveProposal;window.rejectProposal=rejectProposal;window.restoreDeleted=restoreDeleted;window.claimAdmin=claimAdmin;window.doClaimAdmin=doClaimAdmin;window.transferAdmin=transferAdmin;window.softDeletePerson=softDeletePerson;window.softDeleteRelation=softDeleteRelation;window.closeShare=closeShare;window.copyShareLink=copyShareLink;window.shareWhatsApp=shareWhatsApp;window.exportDataAndClose=exportDataAndClose;window.adjustBodyTop=adjustBodyTop;window.setViewer=setViewer;window.updateViewerBadge=updateViewerBadge;window.setLayout=setLayout;window.applyTreeLayout=applyTreeLayout;
+window.openGEDCOMPicker=openGEDCOMPicker;window.openShare=openShare;window.openGov=openGov;window.closeGov=closeGov;window.govTab=govTab;window.approveProposal=approveProposal;window.rejectProposal=rejectProposal;window.restoreDeleted=restoreDeleted;window.claimAdmin=claimAdmin;window.doClaimAdmin=doClaimAdmin;window.transferAdmin=transferAdmin;window.softDeletePerson=softDeletePerson;window.softDeleteRelation=softDeleteRelation;window.closeShare=closeShare;window.copyShareLink=copyShareLink;window.shareWhatsApp=shareWhatsApp;window.exportDataAndClose=exportDataAndClose;window.adjustBodyTop=adjustBodyTop;window.setCtxDepth=setCtxDepth;window.centerOnViewer=centerOnViewer;window.setViewer=setViewer;window.updateViewerBadge=updateViewerBadge;window.setLayout=setLayout;window.applyTreeLayout=applyTreeLayout;
 </script>
 </body>
 </html>
