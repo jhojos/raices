@@ -1859,19 +1859,50 @@ let _proposals=[];  // pending relation proposals
 let _isAdmin=false;
 let _govTab='pending';
 
-// ── Admin detection: first viewer to connect Firebase is admin ──
-function detectAdmin(){
+// ── Admin detection: stored in Firebase, not localStorage ──
+// Admin = the person whose viewerId was first registered in Firebase
+let _adminCheckDone=false;
+
+function detectAdmin(callback){
+  // Check localStorage cache first for instant UI
   try{
-    const adminKey='raices_admin_'+( typeof firebase!=='undefined'&&firebase.apps.length
-      ? firebase.app().options.projectId : 'local');
-    const stored=localStorage.getItem(adminKey);
-    if(stored===viewerId){_isAdmin=true;return;}
-    if(!stored&&viewerId&&viewerId!=='me'){
-      // First real user to open = admin
-      localStorage.setItem(adminKey,viewerId);
-      _isAdmin=true;
-    }
+    const cached=localStorage.getItem('raices_admin_local');
+    if(cached===viewerId)_isAdmin=true;
   }catch(e){}
+  
+  if(typeof firebase==='undefined'||!firebase.apps.length){
+    // Offline mode: first real user on this device = admin
+    try{
+      const k='raices_admin_local';
+      const stored=localStorage.getItem(k);
+      if(!stored&&viewerId&&viewerId!=='me'){localStorage.setItem(k,viewerId);_isAdmin=true;}
+      else if(stored===viewerId){_isAdmin=true;}
+    }catch(e){}
+    if(callback)callback();
+    return;
+  }
+  
+  const adminRef=firebase.firestore().collection('raices').doc('admin');
+  adminRef.get().then(snap=>{
+    if(!snap.exists||!snap.data()?.adminId){
+      // No admin set yet — first real identified user becomes admin
+      if(viewerId&&viewerId!=='me'){
+        adminRef.set({adminId:viewerId,adminName:fullName(persons.find(p=>p.id===viewerId)||{}),setAt:new Date().toISOString()})
+          .then(()=>{
+            _isAdmin=true;
+            try{localStorage.setItem('raices_admin_local',viewerId)}catch(e){}
+            if(callback)callback();
+          }).catch(()=>{if(callback)callback();});
+      } else {
+        if(callback)callback();
+      }
+    } else {
+      // Admin already set — check if current viewer is the admin
+      _isAdmin=(snap.data().adminId===viewerId);
+      try{if(_isAdmin)localStorage.setItem('raices_admin_local',viewerId)}catch(e){}
+      if(callback)callback();
+    }
+  }).catch(()=>{if(callback)callback();});
 }
 
 // ── Log a change ──
@@ -2010,11 +2041,15 @@ function updateGovNotif(){
 
 // ── UI ──
 function openGov(){
-  detectAdmin();loadGov();
-  const roleEl=document.getElementById('gov-role-display');
-  if(roleEl)roleEl.innerHTML=`<span class="gov-role-badge ${_isAdmin?'admin':'user'}">${_isAdmin?'👑 Administrador':'👤 Usuario'}</span>`;
+  loadGov();
+  document.getElementById('gov-modal').classList.add('open');
   govTab('pending');
-  document.getElementById('gov-modal').classList.add('open');}
+  const roleEl=document.getElementById('gov-role-display');
+  if(roleEl)roleEl.innerHTML=`<span class="gov-role-badge user">Verificando…</span>`;
+  detectAdmin(()=>{
+    if(roleEl)roleEl.innerHTML=`<span class="gov-role-badge ${_isAdmin?'admin':'user'}">${_isAdmin?'👑 Administrador':'👤 Usuario'}</span>`;
+    govRenderContent(); // re-render with correct permissions
+  });}
 function closeGov(){document.getElementById('gov-modal').classList.remove('open');}
 
 function govTab(tab){
