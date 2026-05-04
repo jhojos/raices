@@ -689,10 +689,10 @@ textarea{resize:none;height:72px;line-height:1.5}
   <div id="gov-claim-wrap" style="display:none;background:#fffbeb;border:1px solid #fcd34d;border-radius:8px;padding:10px 12px;margin-bottom:12px;font-size:12.5px;color:#92400e">
     ¿Eres el creador de esta red? <button onclick="claimAdmin()" style="background:#f59e0b;border:none;border-radius:6px;padding:4px 10px;font-size:12px;color:#fff;cursor:pointer;font-family:inherit;font-weight:600;margin-left:6px">👑 Reclamar admin</button>
   </div>
-  <div class="gov-tabs">
+  <div class="gov-tabs" id="gov-tabs-wrap">
    <button class="gov-tab active" onclick="govTab('pending')">Pendientes <span id="gov-pending-count"></span></button>
-   <button class="gov-tab" onclick="govTab('history')">Historial</button>
-   <button class="gov-tab" onclick="govTab('deleted')">Eliminados</button>
+   <button class="gov-tab" id="gov-tab-history" onclick="govTab('history')">Historial</button>
+   <button class="gov-tab" id="gov-tab-deleted" onclick="govTab('deleted')">Eliminados</button>
   </div>
   <div id="gov-content"></div>
  </div>
@@ -2077,6 +2077,11 @@ function openGov(){
     // Show claim banner if no admin assigned yet
     const claimWrap=document.getElementById('gov-claim-wrap');
     if(claimWrap)claimWrap.style.display=(!_isAdmin&&!window._currentAdminId)?'block':'none';
+    // Show/hide tabs based on role
+    const tabHistory=document.getElementById('gov-tab-history');
+    const tabDeleted=document.getElementById('gov-tab-deleted');
+    if(tabHistory)tabHistory.style.display=_isAdmin?'':'none';
+    if(tabDeleted)tabDeleted.style.display=_isAdmin?'':'none';
     govRenderContent();
   });}
 function closeGov(){document.getElementById('gov-modal').classList.remove('open');}
@@ -2101,8 +2106,14 @@ function govTimeAgo(ts){
   return`hace ${Math.floor(d/86400)} días`;}
 
 function govRenderPending(){
-  if(!_proposals.length)return`<div class="gov-empty">✓ Sin propuestas pendientes</div>`;
-  return _proposals.map(p=>`
+  // Admin sees all proposals; users only see their own
+  const visible=_isAdmin?_proposals:_proposals.filter(p=>p.actorId===viewerId);
+  if(!visible.length){
+    return _isAdmin
+      ?`<div class="gov-empty">✓ Sin propuestas pendientes</div>`
+      :`<div class="gov-empty">No tienes propuestas pendientes.<br><small style="color:#c4a882">Si agregas un vínculo, aparecerá aquí para aprobación.</small></div>`;
+  }
+  return visible.map(p=>`
     <div class="gov-item">
       <div class="gov-item-head">
         <div class="gov-item-title">${p.description}</div>
@@ -2112,10 +2123,11 @@ function govRenderPending(){
       ${_isAdmin?`<div class="gov-item-actions">
         <button class="gov-btn approve" onclick="approveProposal('${p.id}')">✓ Aprobar</button>
         <button class="gov-btn reject" onclick="rejectProposal('${p.id}')">✗ Rechazar</button>
-      </div>`:`<div style="font-size:11px;color:#c4a882">Pendiente de aprobación del administrador</div>`}
+      </div>`:`<div style="font-size:11px;color:#c4a882">⏳ Pendiente de aprobación del administrador</div>`}
     </div>`).join('');}
 
 function govRenderHistory(){
+  if(!_isAdmin)return`<div class="gov-empty" style="color:#c4a882">🔒 Solo el administrador puede ver el historial completo</div>`;
   if(!_changelog.length)return`<div class="gov-empty">Sin cambios registrados aún</div>`;
   return _changelog.slice(0,30).map(e=>`
     <div class="gov-item" style="opacity:${e.status==='rejected'?.5:1}">
@@ -2130,6 +2142,7 @@ function govRenderHistory(){
     </div>`).join('');}
 
 function govRenderDeleted(){
+  if(!_isAdmin)return`<div class="gov-empty" style="color:#c4a882">🔒 Solo el administrador puede ver los elementos eliminados</div>`;
   if(!_deleted.length)return`<div class="gov-empty">Sin elementos eliminados</div>`;
   return _deleted.map((item,i)=>`
     <div class="gov-item">
@@ -2138,7 +2151,7 @@ function govRenderDeleted(){
         <div class="gov-item-time">${govTimeAgo(item.ts)}</div>
       </div>
       <div class="gov-item-body">${item.type==='person'?`Persona · ${item.relations?.length||0} vínculos asociados`:'Relación entre familiares'}</div>
-      ${_isAdmin?`<div class="gov-item-actions"><button class="gov-btn restore" onclick="restoreDeleted(${i})">↩ Restaurar</button></div>`:''}
+      <div class="gov-item-actions"><button class="gov-btn restore" onclick="restoreDeleted(${i})">↩ Restaurar</button></div>
     </div>`).join('');}
 
 
