@@ -686,6 +686,9 @@ textarea{resize:none;height:72px;line-height:1.5}
    <div id="gov-role-display"></div>
   </div>
   <div class="gov-sub">Historial, propuestas pendientes y protección de la red familiar</div>
+  <div id="gov-claim-wrap" style="display:none;background:#fffbeb;border:1px solid #fcd34d;border-radius:8px;padding:10px 12px;margin-bottom:12px;font-size:12.5px;color:#92400e">
+    ¿Eres el creador de esta red? <button onclick="claimAdmin()" style="background:#f59e0b;border:none;border-radius:6px;padding:4px 10px;font-size:12px;color:#fff;cursor:pointer;font-family:inherit;font-weight:600;margin-left:6px">👑 Reclamar admin</button>
+  </div>
   <div class="gov-tabs">
    <button class="gov-tab active" onclick="govTab('pending')">Pendientes <span id="gov-pending-count"></span></button>
    <button class="gov-tab" onclick="govTab('history')">Historial</button>
@@ -1864,45 +1867,65 @@ let _govTab='pending';
 let _adminCheckDone=false;
 
 function detectAdmin(callback){
-  // Check localStorage cache first for instant UI
-  try{
-    const cached=localStorage.getItem('raices_admin_local');
-    if(cached===viewerId)_isAdmin=true;
-  }catch(e){}
-  
   if(typeof firebase==='undefined'||!firebase.apps.length){
-    // Offline mode: first real user on this device = admin
+    // Offline: device-local admin
     try{
       const k='raices_admin_local';
       const stored=localStorage.getItem(k);
       if(!stored&&viewerId&&viewerId!=='me'){localStorage.setItem(k,viewerId);_isAdmin=true;}
-      else if(stored===viewerId){_isAdmin=true;}
+      else _isAdmin=(stored===viewerId);
     }catch(e){}
     if(callback)callback();
     return;
   }
-  
   const adminRef=firebase.firestore().collection('raices').doc('admin');
   adminRef.get().then(snap=>{
-    if(!snap.exists||!snap.data()?.adminId){
-      // No admin set yet — first real identified user becomes admin
-      if(viewerId&&viewerId!=='me'){
-        adminRef.set({adminId:viewerId,adminName:fullName(persons.find(p=>p.id===viewerId)||{}),setAt:new Date().toISOString()})
-          .then(()=>{
-            _isAdmin=true;
-            try{localStorage.setItem('raices_admin_local',viewerId)}catch(e){}
-            if(callback)callback();
-          }).catch(()=>{if(callback)callback();});
-      } else {
-        if(callback)callback();
-      }
-    } else {
-      // Admin already set — check if current viewer is the admin
-      _isAdmin=(snap.data().adminId===viewerId);
-      try{if(_isAdmin)localStorage.setItem('raices_admin_local',viewerId)}catch(e){}
-      if(callback)callback();
-    }
+    const data=snap.exists?snap.data():null;
+    _isAdmin=data?.adminId===viewerId;
+    // Store admin ID locally so UI knows it
+    if(_isAdmin)try{localStorage.setItem('raices_admin_local',viewerId)}catch(e){}
+    window._currentAdminId=data?.adminId||null;
+    if(callback)callback();
   }).catch(()=>{if(callback)callback();});
+}
+
+function claimAdmin(){
+  if(!viewerId||viewerId==='me'){toast('Primero identifícate en la red con "Este soy yo"','err');return;}
+  if(typeof firebase==='undefined'||!firebase.apps.length){toast('Necesitas estar conectado a Firebase','err');return;}
+  const p=persons.find(x=>x.id===viewerId);
+  showConfirm(
+    '👑 Reclamar administración',
+    `¿Quieres ser el administrador de esta red como <strong>${p?fullName(p):'tú'}</strong>?<br><small style="color:#a8906c">Esto solo funciona si aún no hay admin asignado.</small>`,
+    'doClaimAdmin',null,'Sí, soy yo el admin','Cancelar');
+}
+
+function doClaimAdmin(){
+  const adminRef=firebase.firestore().collection('raices').doc('admin');
+  adminRef.get().then(snap=>{
+    if(snap.exists&&snap.data()?.adminId){
+      toast('Ya hay un administrador asignado. Pídele que te transfiera el rol.','err');
+      return;
+    }
+    const p=persons.find(x=>x.id===viewerId);
+    adminRef.set({adminId:viewerId,adminName:fullName(p||{}),setAt:new Date().toISOString()})
+      .then(()=>{
+        _isAdmin=true;
+        try{localStorage.setItem('raices_admin_local',viewerId)}catch(e){}
+        toast('👑 Ahora eres el administrador ✓','ok');
+        openGov();
+      });
+  }).catch(e=>toast('Error al conectar con Firebase','err'));
+}
+
+function transferAdmin(newId){
+  if(!_isAdmin){toast('Solo el admin puede transferir el rol','err');return;}
+  const p=persons.find(x=>x.id===newId);
+  if(!p)return;
+  showConfirm(
+    'Transferir administración',
+    `¿Darle el rol de administrador a <strong>${fullName(p)}</strong>?`,
+    `function(){firebase.firestore().collection('raices').doc('admin').set({adminId:'${newId}',adminName:'${fullName(p)}',setAt:new Date().toISOString()}).then(()=>{_isAdmin=false;toast('Rol transferido a ${p.firstName} ✓','ok');});}`,
+    null,'Transferir','Cancelar','danger');
 }
 
 // ── Log a change ──
@@ -2048,7 +2071,10 @@ function openGov(){
   if(roleEl)roleEl.innerHTML=`<span class="gov-role-badge user">Verificando…</span>`;
   detectAdmin(()=>{
     if(roleEl)roleEl.innerHTML=`<span class="gov-role-badge ${_isAdmin?'admin':'user'}">${_isAdmin?'👑 Administrador':'👤 Usuario'}</span>`;
-    govRenderContent(); // re-render with correct permissions
+    // Show claim banner if no admin assigned yet
+    const claimWrap=document.getElementById('gov-claim-wrap');
+    if(claimWrap)claimWrap.style.display=(!_isAdmin&&!window._currentAdminId)?'block':'none';
+    govRenderContent();
   });}
 function closeGov(){document.getElementById('gov-modal').classList.remove('open');}
 
@@ -2398,7 +2424,7 @@ function openGEDCOMPicker(){
     const r=new FileReader();
     r.onload=ev=>importGEDCOM(ev.target.result);
     r.readAsText(f,'utf-8');};inp.click();}
-window.openGEDCOMPicker=openGEDCOMPicker;window.openShare=openShare;window.openGov=openGov;window.closeGov=closeGov;window.govTab=govTab;window.approveProposal=approveProposal;window.rejectProposal=rejectProposal;window.restoreDeleted=restoreDeleted;window.softDeletePerson=softDeletePerson;window.softDeleteRelation=softDeleteRelation;window.closeShare=closeShare;window.copyShareLink=copyShareLink;window.shareWhatsApp=shareWhatsApp;window.exportDataAndClose=exportDataAndClose;window.adjustBodyTop=adjustBodyTop;window.setViewer=setViewer;window.updateViewerBadge=updateViewerBadge;window.setLayout=setLayout;window.applyTreeLayout=applyTreeLayout;
+window.openGEDCOMPicker=openGEDCOMPicker;window.openShare=openShare;window.openGov=openGov;window.closeGov=closeGov;window.govTab=govTab;window.approveProposal=approveProposal;window.rejectProposal=rejectProposal;window.restoreDeleted=restoreDeleted;window.claimAdmin=claimAdmin;window.doClaimAdmin=doClaimAdmin;window.transferAdmin=transferAdmin;window.softDeletePerson=softDeletePerson;window.softDeleteRelation=softDeleteRelation;window.closeShare=closeShare;window.copyShareLink=copyShareLink;window.shareWhatsApp=shareWhatsApp;window.exportDataAndClose=exportDataAndClose;window.adjustBodyTop=adjustBodyTop;window.setViewer=setViewer;window.updateViewerBadge=updateViewerBadge;window.setLayout=setLayout;window.applyTreeLayout=applyTreeLayout;
 </script>
 </body>
 </html>
