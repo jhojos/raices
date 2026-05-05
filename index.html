@@ -1477,14 +1477,50 @@ let _ctxDepth=2; // generations up+down from viewer to show
 
 function setCtxDepth(d){
   _ctxDepth=d;
-  // Update button states
   [1,2,3].forEach(n=>{
     const btn=document.getElementById('ctx-d'+n);
     if(btn)btn.classList.toggle('active',n===d);
   });
   const allBtn=document.getElementById('ctx-show-all');
   if(allBtn)allBtn.style.fontWeight=d===99?'700':'400';
-  d3Nodes=[];updateGraph();}
+  d3Nodes=[];
+  updateGraph();
+  // After simulation settles, fit all visible nodes in viewport
+  setTimeout(fitVisibleNodes, 900);}
+
+function fitVisibleNodes(){
+  if(!d3Nodes.length||!svgEl)return;
+  const W=svgEl.parentElement?.clientWidth||900;
+  const H=svgEl.parentElement?.clientHeight||700;
+  const hoyH=(!_hoyCollapsed&&document.getElementById('hoy-wrap'))?
+    document.getElementById('hoy-wrap').offsetHeight||0:0;
+  const availH=H-hoyH;
+
+  // Get bounding box of all current d3Nodes
+  const xs=d3Nodes.map(n=>n.x||0).filter(x=>isFinite(x));
+  const ys=d3Nodes.map(n=>n.y||0).filter(y=>isFinite(y));
+  if(!xs.length)return;
+
+  const minX=Math.min(...xs), maxX=Math.max(...xs);
+  const minY=Math.min(...ys), maxY=Math.max(...ys);
+  const bW=maxX-minX||1, bH=maxY-minY||1;
+
+  const pad=80;
+  const scaleX=(W-pad*2)/bW;
+  const scaleY=(availH-pad*2)/bH;
+  const scale=Math.min(scaleX,scaleY,1.4); // max zoom 1.4x
+
+  const cx=(minX+maxX)/2;
+  const cy=(minY+maxY)/2;
+  const tx=W/2-cx*scale;
+  const ty=hoyH+availH/2-cy*scale;
+
+  const root=d3.select(svgEl).select('.root');
+  if(!root.node())return;
+  root.transition().duration(500).ease(d3.easeCubicOut)
+    .attr('transform',`translate(${tx},${ty}) scale(${scale})`);}
+
+window.fitVisibleNodes=fitVisibleNodes;
 
 function getContextNodes(depth){
   if(depth>=99)return new Set(persons.map(p=>p.id));
@@ -1605,12 +1641,18 @@ function centerOnViewer(animate=true){
   try{
     const vn=d3Nodes.find(n=>n.id===viewerId);
     if(!vn||!svgEl)return;
+    // If few nodes, fit all; otherwise just center on viewer
+    if(d3Nodes.length<=6){
+      fitVisibleNodes();return;
+    }
     const W=svgEl.parentElement?.clientWidth||900;
     const H=svgEl.parentElement?.clientHeight||700;
+    const hoyH=(!_hoyCollapsed&&document.getElementById('hoy-wrap'))?
+      document.getElementById('hoy-wrap').offsetHeight||0:0;
     const root=d3.select(svgEl).select('.root');
     if(!root.node())return;
     const tx=W/2-(vn.x||0);
-    const ty=H/2-(vn.y||0);
+    const ty=hoyH+(H-hoyH)/2-(vn.y||0);
     if(animate){
       root.transition().duration(500).attr('transform',`translate(${tx},${ty})`);
     } else {
@@ -1895,73 +1937,233 @@ function lineageGroupKey(pid){
   if(l?.startsWith('political'))return'political';
   return'unknown';}
 
+
 function openPDF(){
-  const gm=computeGens();
-  // Build lineage from "me"
-  const meId=viewerId; // dynamic per viewer
-  // Direct line: viewer → parents → grandparents → great-grandparents → children → grandchildren → great-grandchildren
-  const directIds=new Set([meId]);
-  function addAncestors(pid,depth){if(depth<=0)return;getParents(pid).forEach(pp=>{directIds.add(pp.id);addAncestors(pp.id,depth-1);});}
-  function addDescendants(pid,depth){if(depth<=0)return;getChildren(pid).forEach(c=>{directIds.add(c.id);addDescendants(c.id,depth-1);});}
-  addAncestors(meId,3);addDescendants(meId,3);
-  // Partners of direct line people are also direct context
-  const partnerIds=new Set();
-  relations.filter(r=>r.type==='partner').forEach(r=>{if(directIds.has(r.source))partnerIds.add(r.target);if(directIds.has(r.target))partnerIds.add(r.source);});
-  partnerIds.forEach(id=>directIds.add(id));
-  const collateralIds=new Set(persons.filter(p=>!directIds.has(p.id)).map(p=>p.id));
-  const directP=persons.filter(p=>directIds.has(p.id));
-  const collateralP=persons.filter(p=>collateralIds.has(p.id));
-  function sortByGen(arr){return arr.slice().sort((a,b)=>(gm.get(a.id)??0)-(gm.get(b.id)??0));}
-  function cardHTML(p){const ns=nStyle(p);const by=birthYear(p),dy=p.deathDate?p.deathDate.slice(0,4):null;const rel=p.id!==viewerId?findRel(viewerId,p.id):null;
-    const lineage=p.id!==meId?lineageLabel(p.id):'';
-    return`<div style="background:#fff;border:1.5px solid #e2e8f0;border-radius:10px;padding:11px;display:flex;align-items:flex-start;gap:10px;width:210px;page-break-inside:avoid;border-top:3px solid ${ns.border}">${p.photo?`<img style="width:42px;height:42px;border-radius:50%;object-fit:cover;flex-shrink:0;border:1.5px solid ${ns.border}" src="${p.photo}">`:`<div style="width:42px;height:42px;border-radius:50%;background:${ns.fill};border:2px solid ${ns.border};display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:700;color:${ns.text};flex-shrink:0">${initials(p)}</div>`}<div style="min-width:0"><div style="font-size:12.5px;font-weight:600;color:#0f172a;font-family:Georgia,serif;line-height:1.2;word-break:break-word">${fullName(p)}</div>${by?`<div style="font-size:10px;color:#94a3b8;margin-top:2px">n.${by}${dy?` · †${dy}`:''}</div>`:''}${p.location?`<div style="font-size:10px;color:#94a3b8">📍${p.location}</div>`:''}${rel?`<div style="font-size:10px;color:${ns.border};margin-top:3px;font-weight:500">${rel}${lineage}</div>`:''}${!rel&&lineage?`<div style="font-size:10px;color:#94a3b8;margin-top:3px">${lineage.replace(' · ','')}</div>`:''}${p.story?`<div style="font-size:10px;color:#64748b;margin-top:4px;font-style:italic;line-height:1.4">"${p.story.slice(0,70)}${p.story.length>70?'…':''}"</div>`:''}
-  </div></div>`;}
-  // Group direct by generation
-  const byGen=new Map();sortByGen(directP).forEach(p=>{const g=gm.get(p.id)??0;(byGen.get(g)||(byGen.set(g,[]),byGen.get(g))).push(p);});
-  const genRows=[...byGen.keys()].sort((a,b)=>a-b).map(g=>{const lbl=GL[String(g)]||(g>0?`Generación +${g}`:`Generación ${g}`);return`<div style="margin-bottom:24px"><div style="font-size:9px;text-transform:uppercase;letter-spacing:.12em;color:#94a3b8;margin-bottom:9px;padding-bottom:5px;border-bottom:1px solid #e2e8f0">${lbl}</div><div style="display:flex;flex-wrap:wrap;gap:10px">${byGen.get(g).map(cardHTML).join('')}</div></div>`;}).join('');
-  // Group collateral by lineage
-  const collByLineage={paternal:[],maternal:[],both:[],political:[],unknown:[]};
-  collateralP.forEach(p=>{
-    const key=lineageGroupKey(p.id);
-    (collByLineage[key]=collByLineage[key]||[]).push(p);
-  });
-  function collSection(title,subtitle,arr){
-    if(!arr.length)return'';
-    return`<div style="margin-bottom:18px">
-      <div style="font-size:9px;text-transform:uppercase;letter-spacing:.1em;color:#94a3b8;margin-bottom:3px;padding-bottom:4px;border-bottom:1px dashed #e2e8f0">${title} (${arr.length})</div>
-      ${subtitle?`<div style="font-size:10px;color:#cbd5e1;margin-bottom:8px;font-style:italic">${subtitle}</div>`:''}
-      <div style="display:flex;flex-wrap:wrap;gap:10px">${sortByGen(arr).map(cardHTML).join('')}</div>
+  const meId=viewerId;
+  const me=persons.find(p=>p.id===meId);
+  if(!me){toast('Primero identifícate en la red con "Este soy yo"','err');return;}
+
+  // ── Helper functions ──
+  function getParentIds(pid){return relations.filter(r=>(r.type==='parent'||r.type==='adopted')&&r.target===pid).map(r=>r.source);}
+  function getChildIds(pid){return relations.filter(r=>(r.type==='parent'||r.type==='adopted')&&r.source===pid).map(r=>r.target);}
+  function getPartnerIds(pid){return relations.filter(r=>r.type==='partner'&&(r.source===pid||r.target===pid)).map(r=>r.source===pid?r.target:r.source);}
+  function getPerson(pid){return persons.find(p=>p.id===pid);}
+  function fmtYear(d){return d&&d.length>=4?d.slice(0,4):'';}
+  function fmtName(p){if(!p)return'';return `${p.firstName||''} ${p.lastName||''}`.trim();}
+  function dedup(arr){const s=new Set();return arr.filter(p=>{if(!p||s.has(p.id))return false;s.add(p.id);return true;});}
+
+  // ── Rule: blood relative = reaches viewer via parent links only ──
+  function isBloodRelative(pid){
+    // BFS upward/downward using only parent links
+    const visited=new Set([meId]);const q=[meId];
+    while(q.length){const cur=q.shift();
+      for(const r of relations){
+        if(r.type!=='parent'&&r.type!=='adopted')continue;
+        const next=r.source===cur?r.target:r.target===cur?r.source:null;
+        if(next&&!visited.has(next)){
+          if(next===pid)return true;
+          visited.add(next);q.push(next);}}}
+    return false;}
+
+  // ── Blood parents only (exclude stepparents) ──
+  function bloodParentIds(pid){
+    // A parent is "blood" if they are blood relative of viewer
+    return getParentIds(pid).filter(id=>id===meId||isBloodRelative(id));}
+
+  // ── Build tree sections (blood only, partners only as direct couple) ──
+  const tree=[];
+
+  // Gen +2: grandchildren — blood only
+  const children=getChildIds(meId).map(getPerson).filter(Boolean);
+  const grandchildren=dedup(children.flatMap(c=>getChildIds(c.id).map(getPerson).filter(Boolean))).slice(0,8);
+  if(grandchildren.length)tree.push({gen:2,nodes:grandchildren,label:'Nietos/as'});
+
+  // Gen +1: children only (no in-laws/yernos/nueras)
+  if(children.length)tree.push({gen:1,nodes:dedup(children),label:'Hijos/as'});
+
+  // Gen 0: viewer + direct partner(s) only — marked as partner context
+  const myPartners=getPartnerIds(meId).map(getPerson).filter(Boolean);
+  tree.push({gen:0,nodes:dedup([me,...myPartners]),label:'Tu generación',isViewer:true,partnerIds:myPartners.map(p=>p.id)});
+
+  // Gen 0 lateral: full siblings (share both parents) and half-siblings (share one)
+  const myParentIds=getParentIds(meId);
+  const fullSiblings=dedup(
+    myParentIds.length>=2
+      ? getChildIds(myParentIds[0]).map(getPerson).filter(Boolean)
+          .filter(p=>p.id!==meId&&myParentIds.every(pid=>getParentIds(p.id).includes(pid)))
+      : []
+  );
+  const halfSiblings=dedup(
+    myParentIds.flatMap(pid=>getChildIds(pid).map(getPerson).filter(Boolean)
+      .filter(p=>p.id!==meId&&!fullSiblings.find(s=>s.id===p.id)))
+  );
+  const allSiblings=dedup([...fullSiblings,...halfSiblings]);
+  if(fullSiblings.length)tree.push({gen:0.5,nodes:fullSiblings,label:'Hermanos/as',isSibling:true});
+  if(halfSiblings.length)tree.push({gen:0.6,nodes:halfSiblings,label:'Medios hermanos/as',isSibling:true});
+
+  // Gen -1: blood parents only (NO madrastras / padrastros)
+  const parents=dedup(getParentIds(meId).map(getPerson).filter(Boolean));
+  if(parents.length)tree.push({gen:-1,nodes:parents,label:'Padres'});
+
+  // Gen -1 lateral: tíos/as separated by paternal/maternal line
+  // For each parent, find their siblings via shared grandparents
+  function getSiblingsOf(pid){
+    const gpIds=getParentIds(pid); // grandparents of viewer = parents of this parent
+    const allSiblings=gpIds.flatMap(gpid=>
+      getChildIds(gpid).map(getPerson).filter(Boolean).filter(x=>x.id!==pid&&x.id!==meId)
+    );
+    return dedup(allSiblings);}
+
+  const dadNode=parents.find(p=>p.gender==='male')||(parents.length===1?parents[0]:null);
+  const momNode=parents.find(p=>p.gender==='female');
+
+  const tiosPat=dadNode?getSiblingsOf(dadNode.id):[];
+  const tiosMat=momNode?getSiblingsOf(momNode.id):[];
+
+  // Only show a line if it has at least 1 tío — no partial inclusion
+  if(tiosPat.length)tree.push({gen:-0.5,nodes:tiosPat,label:'Tíos/as paternos',isLateral:true});
+  if(tiosMat.length)tree.push({gen:-0.4,nodes:tiosMat,label:'Tíos/as maternos',isLateral:true});
+
+  // Gen -2: grandparents separated by line
+  const gpPat=dadNode?dedup(getParentIds(dadNode.id).map(getPerson).filter(Boolean)):[];
+  const gpMat=momNode?dedup(getParentIds(momNode.id).map(getPerson).filter(Boolean)):[];
+  const grandparents=dedup([...gpPat,...gpMat]);
+
+  if(gpPat.length&&gpMat.length){
+    // Both lines present — show together with label indicating both
+    tree.push({gen:-2,nodes:grandparents,label:'Abuelos/as'});
+  } else if(gpPat.length){
+    tree.push({gen:-2,nodes:gpPat,label:'Abuelos/as paternos'});
+  } else if(gpMat.length){
+    tree.push({gen:-2,nodes:gpMat,label:'Abuelos/as maternos'});
+  }
+
+  // Gen -3: great-grandparents (no artificial limit)
+  const ggparents=dedup(grandparents.flatMap(g=>getParentIds(g.id).map(getPerson).filter(Boolean)));
+  if(ggparents.length)tree.push({gen:-3,nodes:ggparents,label:'Bisabuelos/as'});
+
+  // Sort top to bottom
+  tree.sort((a,b)=>a.gen-b.gen);
+
+  // ── Build node HTML ──
+  function nodeColor(p,isViewerNode,isPartner){
+    if(isViewerNode)return{bg:'#fffbeb',border:'#f59e0b',text:'#92400e'};
+    if(isPartner)return{bg:'#fafafa',border:'#cbd5e1',text:'#64748b'};
+    if(p.deathDate)return{bg:'#f8f8f8',border:'#94a3b8',text:'#475569'};
+    if(p.gender==='male')return{bg:'#eff6ff',border:'#93c5fd',text:'#1e40af'};
+    if(p.gender==='female')return{bg:'#fdf2f8',border:'#f9a8d4',text:'#9d174d'};
+    return{bg:'#f5f3ff',border:'#c4b5fd',text:'#6d28d9'};
+  }
+
+  function nodeHTML(p,isViewerNode,isPartner){
+    if(!p)return'';
+    const c=nodeColor(p,isViewerNode,isPartner);
+    const by=fmtYear(p.birthDate),dy=fmtYear(p.deathDate);
+    const years=by&&dy?`${by} – ${dy}`:by?`n. ${by}`:dy?`† ${dy}`:'';
+    const ini=(p.firstName?.[0]||'')+(p.lastName?.[0]||'');
+    const photo=p.photo?
+      `<img src="${p.photo}" style="width:64px;height:64px;border-radius:50%;object-fit:cover;border:3px solid ${c.border};display:block;margin:0 auto 7px">`:
+      `<div style="width:64px;height:64px;border-radius:50%;background:${c.bg};border:3px solid ${c.border};display:flex;align-items:center;justify-content:center;font-size:20px;font-weight:700;color:${c.border};margin:0 auto 7px">${ini}</div>`;
+    const deceased=p.deathDate?`<div style="font-size:9px;color:#94a3b8;text-align:center;margin-top:2px">†</div>`:'';
+    return`<div style="display:inline-flex;flex-direction:column;align-items:center;padding:10px 8px;background:#fff;border:2px solid ${c.border};border-radius:12px;min-width:90px;max-width:110px;box-shadow:0 2px 8px rgba(0,0,0,.07);${isViewerNode?'box-shadow:0 4px 16px rgba(245,158,11,.25);':''}" >
+      ${photo}
+      <div style="font-family:'Playfair Display',Georgia,serif;font-size:12px;font-weight:600;color:#1e293b;text-align:center;line-height:1.3;word-break:break-word;">${fmtName(p)}</div>
+      ${years?`<div style="font-size:9.5px;color:#94a3b8;text-align:center;margin-top:3px">${years}</div>`:''}
+      ${deceased}
+      ${isPartner?`<div style="font-size:8px;color:#94a3b8;text-align:center;margin-top:2px;font-style:italic">pareja</div>`:''}
     </div>`;
   }
-  const collRows=collateralP.length?`<div style="margin-bottom:8px">
-    <h2 style="font-family:'Playfair Display',serif;font-size:18px;color:#0f172a;margin-bottom:6px;font-weight:500">🌿 Línea colateral (${collateralP.length} personas)</h2>
-    <p style="font-size:11px;color:#94a3b8;margin-bottom:16px">Organizados por línea sanguínea · Los parientes políticos son familiares por matrimonio, sin vínculo de sangre directo</p>
-    ${collSection('Línea paterna','Tíos/as, hermanos/as, primos/as y sobrinos/as por parte de tu padre',collByLineage.paternal)}
-    ${collSection('Línea materna','Tíos/as, hermanos/as, primos/as y sobrinos/as por parte de tu madre',collByLineage.maternal)}
-    ${collSection('Ambas líneas','Parientes presentes en ambas ramas familiares',collByLineage.both)}
-    ${collSection('Parientes políticos','Cuñados/as y parejas de familiares — sin vínculo de sangre directo',collByLineage.political)}
-    ${collSection('Sin clasificar','Sin suficiente información para determinar la línea',collByLineage.unknown)}
-  </div>`:'';
-  const _unused=collateralP.length?`<div style="margin-bottom:24px"><div style="font-size:9px;text-transform:uppercase;letter-spacing:.12em;color:#94a3b8;margin-bottom:9px;padding-bottom:5px;border-bottom:1px solid #e2e8f0">Línea colateral (tíos/as, hermanos/as, primos/as, cuñados/as, sobrinos/as)</div><div style="display:flex;flex-wrap:wrap;gap:10px">${sortByGen(collateralP).map(cardHTML).join('')}</div></div>`:'';
-  const pw=window.open('','_blank','width=1200,height=900');
-  pw.document.write(`<!DOCTYPE html><html lang="es"><head><meta charset="utf-8"><title>Raíces — Mi Familia</title><link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600&family=DM+Sans:opsz,wght@9..40,400;9..40,500&display=swap" rel="stylesheet"><style>*{box-sizing:border-box;margin:0;padding:0}body{font-family:'DM Sans',sans-serif;background:#f8fafc;padding:28px;color:#1e293b}@media print{body{background:#fff;padding:15px}@page{margin:1cm}}</style></head><body>
-  <div style="display:flex;align-items:center;gap:12px;margin-bottom:6px"><div style="width:36px;height:36px;background:linear-gradient(135deg,#22c55e,#16a34a);border-radius:50% 50% 50% 10%;display:flex;align-items:center;justify-content:center;font-size:18px">🌿</div><div><div style="font-family:'Playfair Display',serif;font-size:26px;color:#0f172a;font-weight:600">Raíces</div><div style="font-size:12px;color:#94a3b8">Vista de ${fullName(persons.find(p=>p.id===viewerId)||{firstName:'la familia'})} · ${new Date().toLocaleDateString('es-CL',{year:'numeric',month:'long',day:'numeric'})}</div></div></div>
-  <div style="display:flex;gap:12px;margin:16px 0 24px;flex-wrap:wrap">
-    <div style="background:#fff;border:1px solid #e2e8f0;border-radius:8px;padding:10px 16px;text-align:center"><div style="font-size:20px;font-weight:600;color:#0f172a">${persons.length}</div><div style="font-size:10px;color:#94a3b8">personas</div></div>
-    <div style="background:#fff;border:1px solid #e2e8f0;border-radius:8px;padding:10px 16px;text-align:center"><div style="font-size:20px;font-weight:600;color:#0f172a">${numGens()}</div><div style="font-size:10px;color:#94a3b8">generaciones</div></div>
-    <div style="background:#fff;border:1px solid #e2e8f0;border-radius:8px;padding:10px 16px;text-align:center"><div style="font-size:20px;font-weight:600;color:#0f172a">${persons.filter(p=>p.photo).length}</div><div style="font-size:10px;color:#94a3b8">fotos</div></div>
+
+  // ── Build connector lines between generations ──
+  function connectorHTML(){
+    return`<div style="display:flex;justify-content:center;align-items:center;height:28px">
+      <div style="width:2px;background:linear-gradient(180deg,#e2d5c3,#c4a882);height:100%;border-radius:1px"></div>
+    </div>`;}
+
+  // ── Build generation row ──
+  function genRowHTML(row){
+    const partnerIds=row.partnerIds||[];
+    const nodes=row.nodes.map((p,i)=>nodeHTML(p,row.isViewer&&i===0,partnerIds.includes(p.id))).join(
+      row.isSibling||row.isLateral
+        ?'<div style="width:8px;flex-shrink:0"></div>'
+        :'<div style="width:16px;flex-shrink:0;display:flex;align-items:center;justify-content:center"><div style="font-size:14px;color:#e2d5c3">♡</div></div>'
+    );
+    const rowStyle=row.isSibling?'background:#f9f5f0;border-radius:10px;padding:10px;border:1px dashed #e2d5c3;':
+      row.isLateral?'background:#f9f5f0;border-radius:10px;padding:10px;border:1px dashed #e8ddd0;':'';
+    return`<div style="margin-bottom:4px">
+      <div style="font-size:9px;text-transform:uppercase;letter-spacing:.1em;color:#c4a882;text-align:center;margin-bottom:10px;font-family:Arial,sans-serif">${row.label}</div>
+      <div style="${rowStyle}display:flex;justify-content:center;align-items:flex-start;flex-wrap:wrap;gap:8px">${nodes}</div>
+    </div>`;}
+
+  // ── Assemble full page ──
+  const viewerName=fmtName(me);
+  const today=new Date().toLocaleDateString('es-CL',{year:'numeric',month:'long',day:'numeric'});
+  const totalPeople=tree.reduce((s,r)=>s+r.nodes.length,0);
+
+  const rows=tree.map((row,i)=>{
+    const rowHTML=genRowHTML(row);
+    const connector=(i<tree.length-1)?connectorHTML():'';
+    return rowHTML+connector;
+  }).join('');
+
+  const html=`<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<title>Árbol familiar — ${viewerName}</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;1,400&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{font-family:'DM Sans',Arial,sans-serif;background:#faf7f3;color:#1e293b;-webkit-print-color-adjust:exact;print-color-adjust:exact}
+  @media print{
+    body{background:#fff}
+    .no-print{display:none}
+    @page{margin:1.5cm;size:A4 portrait}
+  }
+</style>
+</head>
+<body>
+<div style="max-width:680px;margin:0 auto;padding:28px 24px 40px">
+
+  <!-- HEADER -->
+  <div style="text-align:center;margin-bottom:32px;padding-bottom:24px;border-bottom:1px solid #e8ddd0">
+    <div style="display:inline-flex;align-items:center;gap:8px;margin-bottom:10px">
+      <div style="width:28px;height:28px;background:linear-gradient(135deg,#22c55e,#16a34a);border-radius:50% 50% 50% 10%;display:flex;align-items:center;justify-content:center;font-size:14px">🌿</div>
+      <span style="font-family:'Playfair Display',serif;font-size:14px;color:#166534;font-weight:600;letter-spacing:.02em">Raíces</span>
+    </div>
+    <div style="font-family:'Playfair Display',serif;font-size:26px;font-weight:600;color:#0f172a;line-height:1.2;margin-bottom:6px">Árbol familiar de<br><em style="color:#16a34a">${viewerName}</em></div>
+    <div style="font-size:11px;color:#94a3b8;margin-top:8px">${totalPeople} personas · Generado el ${today}</div>
+    <div style="font-size:12px;color:#78563a;margin-top:4px;font-style:italic">"Conocer nuestras raíces es entender quiénes somos"</div>
   </div>
-  <div style="font-size:10px;background:#f0fdf4;border:1px solid #bbf7d0;border-radius:6px;padding:8px 12px;color:#166534;margin-bottom:22px">Línea directa: ascendientes y descendientes directos más sus parejas · Línea colateral: tíos/as, hermanos/as, primos/as, cuñados/as y sobrinos/as</div>
-  <h2 style="font-family:'Playfair Display',serif;font-size:18px;color:#0f172a;margin-bottom:8px;font-weight:500">📍 Línea directa (${directP.length} personas)</h2>
-  <p style="font-size:11px;color:#94a3b8;margin-bottom:16px">Ascendientes y descendientes directos: abuelos, padres, hijos, nietos y sus parejas</p>
-  ${genRows}
-  ${collRows}
-  <div style="text-align:center;margin-top:28px;font-size:10px;color:#cbd5e1;border-top:1px solid #e2e8f0;padding-top:14px">Raíces · La red viva de tu familia · raices.app</div>
-  </body></html>`);
-  pw.document.write('<scr'+'ipt>setTimeout(()=>window.print(),700)</scr'+'ipt>');
+
+  <!-- TREE -->
+  <div style="display:flex;flex-direction:column;align-items:center">
+    ${rows}
+  </div>
+
+  <!-- FOOTER -->
+  <div style="margin-top:36px;padding-top:18px;border-top:1px solid #e8ddd0;text-align:center">
+    <div style="font-size:9px;color:#c4a882">Raíces · La red viva de tu familia · jhojos.github.io/raices</div>
+  </div>
+
+  <!-- PRINT BUTTON -->
+  <div class="no-print" style="text-align:center;margin-top:28px">
+    <button onclick="window.print()" style="background:linear-gradient(135deg,#16a34a,#15803d);border:none;border-radius:10px;padding:12px 32px;font-size:14px;font-weight:600;color:#fff;cursor:pointer;font-family:inherit;box-shadow:0 3px 14px rgba(22,163,74,.3)">
+      🖨 Imprimir o guardar como PDF
+    </button>
+    <div style="font-size:11px;color:#94a3b8;margin-top:8px">En el diálogo de impresión, selecciona "Guardar como PDF"</div>
+  </div>
+</div>
+</body>
+</html>`;
+
+  const pw=window.open('','_blank','width=800,height=900');
+  if(!pw){toast('Permite las ventanas emergentes para generar el PDF','err');return;}
+  pw.document.write(html);
   pw.document.close();}
 
-// ── Export / Import ──
+
+
 function exportData(){const data=JSON.stringify({persons,relations,exportedAt:new Date().toISOString()},null,2);const blob=new Blob([data],{type:'application/json'});const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='raices-familia.json';a.click();toast('Exportado ✓','info');}
 function importData(ev){const f=ev.target.files[0];if(!f)return;const reader=new FileReader();reader.onload=e=>{try{const d=JSON.parse(e.target.result);if(!d.persons||!d.relations)throw new Error();persons=d.persons;relations=d.relations;try{localStorage.setItem(SK,JSON.stringify({persons,relations}))}catch(e){}d3Nodes=[];initGraph();toast(`${persons.length} personas importadas ✓`,'info');}catch{toast('Archivo no válido','err');}};reader.readAsText(f);ev.target.value='';}
 
@@ -2383,6 +2585,7 @@ function initFirebase(cfgRaw){
         d3Nodes=[];updateGraph();
         setSyncStatus('ok','En vivo · '+new Date().toLocaleTimeString('es',{hour:'2-digit',minute:'2-digit'}));
         addActivity('La familia','actualizó el árbol');
+        setTimeout(fitVisibleNodes,900);
       });
       setSyncStatus('ok','En vivo 🔥');
     }).catch(e=>{
@@ -2471,6 +2674,16 @@ if(_fbStored){
   setTimeout(()=>_tryConnect(_EMBEDDED,0),500);
 }
 window.persons=persons;window.relations=relations;window.showProfile=showProfile;window.openPanel=openPanel;window.closePanel=closePanel;window.renderHL=renderHL;window.addRelativeOf=addRelativeOf;window.prevRel=prevRel;window.addPerson=addPerson;window.savePerson=savePerson;window.delPerson=delPerson;window.addRel=addRel;window.submitAR=submitAR;window.pickPhotoForm=pickPhotoForm;window.pickPhotoAR=pickPhotoAR;window.openFbModal=openFbModal;window.deleteRel=deleteRel;window.closeFbModal=closeFbModal;window.connectFirebase=connectFirebase;window.showWelcome=showWelcome;window.wzRender=wzRender;window.wzUpdateSearch=wzUpdateSearch;window.wzSelectPerson=wzSelectPerson;window.wzConfirmFound=wzConfirmFound;window.wzCreateSelf=wzCreateSelf;window.wzCreateSelfForced=wzCreateSelfForced;window.hideMagic=hideMagic;window.closeConfirm=closeConfirm;window.toggleHoy=toggleHoy;window._doAddPerson=_doAddPerson;window.openPDF=openPDF;window.exportData=exportData;window.importData=importData;
+function openMobMenu(){
+  const el=document.getElementById('mob-menu');
+  if(el)el.classList.add('open');
+  const lbl=document.getElementById('sync-lbl')?.textContent||'Sin conectar';
+  const ml=document.getElementById('mob-sync-lbl');
+  if(ml)ml.textContent=lbl;}
+function closeMobMenu(){
+  const el=document.getElementById('mob-menu');
+  if(el)el.classList.remove('open');}
+window.openMobMenu=openMobMenu;window.closeMobMenu=closeMobMenu;window.dismissWelcome=dismissWelcome;
 
 // ══════ GEDCOM IMPORT ══════
 function importGEDCOM(text){
