@@ -2249,21 +2249,22 @@ function transferAdmin(newId){
 }
 
 // ── Log a change ──
-function logChange(type, data, description){
+function logChange(type, data, description, before=null){
   const actor=persons.find(p=>p.id===viewerId);
   const entry={
     id:uid(),
-    type, // 'add_person','edit_person','add_relation','delete_person','delete_relation','propose_relation'
+    type,
     actorId:viewerId,
     actorName:actor?fullName(actor):'Desconocido',
     description,
-    data:JSON.parse(JSON.stringify(data)), // deep copy
+    data:JSON.parse(JSON.stringify(data)),
+    before:before?JSON.parse(JSON.stringify(before)):null, // snapshot before change
     ts:new Date().toISOString(),
-    status:'done' // 'done','pending','approved','rejected'
+    status:'done'
   };
   _changelog.unshift(entry);
-  if(_changelog.length>200)_changelog=_changelog.slice(0,200);
-  saveGov();
+  if(_changelog.length>100)_changelog=_changelog.slice(0,100);
+  saveGov(); // triggers onSnapshot on all devices
   updateGovNotif();
   return entry;}
 
@@ -2349,31 +2350,51 @@ function rejectProposal(pid){
 
 // ── Persist ──
 function saveGov(){
+  // Always save to localStorage
   try{localStorage.setItem(GOV_KEY,JSON.stringify({changelog:_changelog,deleted:_deleted,proposals:_proposals}))}catch(e){}
-  // Sync to Firebase if connected
-  if(typeof firebase!=='undefined'&&firebase.apps.length){
-    try{
-      firebase.firestore().collection('raices').doc('governance')
-        .set({changelog:_changelog.slice(0,50),deleted:_deleted,proposals:_proposals,updatedAt:new Date().toISOString()})
-        .catch(()=>{});
-    }catch(e){}
-  }}
+  // Write to Firebase — this triggers onSnapshot on ALL connected devices
+  if(typeof firebase==='undefined'||!firebase.apps.length)return;
+  const actor=persons.find(p=>p.id===viewerId);
+  firebase.firestore().collection('raices').doc('governance')
+    .set({
+      changelog:_changelog.slice(0,100), // keep last 100 entries
+      deleted:_deleted,
+      proposals:_proposals,
+      updatedAt:new Date().toISOString(),
+      updatedBy:viewerId,
+      updatedByName:actor?fullName(actor):'Desconocido'
+    })
+    .catch(e=>console.warn('Gov save error:',e));}
+
+let _govUnsubscribe=null;
 
 function loadGov(){
+  // Load from localStorage first (instant)
   try{
     const d=JSON.parse(localStorage.getItem(GOV_KEY)||'{}');
     _changelog=d.changelog||[];_deleted=d.deleted||[];_proposals=d.proposals||[];
   }catch(e){}
-  // Try Firebase
-  if(typeof firebase!=='undefined'&&firebase.apps.length){
-    firebase.firestore().collection('raices').doc('governance').get()
-      .then(snap=>{if(snap.exists){const d=snap.data();
-        if(d.changelog)_changelog=d.changelog;
-        if(d.deleted)_deleted=d.deleted;
-        if(d.proposals)_proposals=d.proposals;
-        updateGovNotif();}})
-      .catch(()=>{});
-  }}
+
+  if(typeof firebase==='undefined'||!firebase.apps.length)return;
+
+  // Set up real-time listener — receives updates from ALL users
+  if(_govUnsubscribe)_govUnsubscribe(); // clear old listener
+  const govRef=firebase.firestore().collection('raices').doc('governance');
+  _govUnsubscribe=govRef.onSnapshot(snap=>{
+    if(!snap.exists)return;
+    const d=snap.data();
+    if(d.changelog)_changelog=d.changelog;
+    if(d.deleted)_deleted=d.deleted;
+    if(d.proposals)_proposals=d.proposals;
+    // Cache locally
+    try{localStorage.setItem(GOV_KEY,JSON.stringify({changelog:_changelog,deleted:_deleted,proposals:_proposals}))}catch(e){}
+    updateGovNotif();
+    // If gov modal is open, refresh it
+    if(document.getElementById('gov-modal')?.classList.contains('open')){
+      govRenderContent();
+    }
+  },()=>{}); // ignore errors silently
+}
 
 function updateGovNotif(){
   const n=document.getElementById('gov-notif');
@@ -2588,6 +2609,7 @@ function initFirebase(cfgRaw){
         setTimeout(fitVisibleNodes,900);
       });
       setSyncStatus('ok','En vivo 🔥');
+      loadGov(); // start real-time governance listener
     }).catch(e=>{
       console.error(e);
       setSyncStatus('err','Error al conectar');
