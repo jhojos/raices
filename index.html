@@ -1530,17 +1530,20 @@ function getContextNodes(depth){
 
   while(queue.length){
     const{id,gen}=queue.shift();
-    if(Math.abs(gen)>=depth)continue;
+    // Partners only count at gen=0 (same generation as viewer)
+    // and only travel through blood (parent) links across generations
     for(const r of relations){
       let nid=null,ng=null;
       if(r.type==='parent'||r.type==='adopted'){
-        if(r.target===id){nid=r.source;ng=gen-1;} // parent = one gen up
-        else if(r.source===id){nid=r.target;ng=gen+1;} // child = one gen down
+        if(r.target===id&&Math.abs(gen-1)<depth){nid=r.source;ng=gen-1;} // go up
+        else if(r.source===id&&Math.abs(gen+1)<=depth){nid=r.target;ng=gen+1;} // go down
       }
-      if(r.type==='partner'){
-        if(r.source===id)nid=r.target;
-        else if(r.target===id)nid=r.source;
-        ng=gen;
+      // Partners: include ONLY the direct partner of the viewer (gen=0)
+      // Never follow partner links to reach other generations
+      if(r.type==='partner'&&id===viewerId){
+        if(r.source===viewerId)nid=r.target;
+        else if(r.target===viewerId)nid=r.source;
+        ng=0;
       }
       if(nid&&!visited.has(nid)){
         visited.add(nid);visible.add(nid);
