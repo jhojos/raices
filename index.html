@@ -611,6 +611,9 @@ textarea{resize:none;height:72px;line-height:1.5}
   <button class="hb amber" id="btn-rel" onclick="openPanel('rel')">+ Vínculo</button>
   <button class="hb pri" onclick="openPanel('person')">+ Persona</button>
  </div>
+  <div id="viewer-badge" style="display:none;align-items:center;gap:5px;background:#fffbeb;border:1px solid #fcd34d;border-radius:20px;padding:3px 10px;font-size:10.5px;color:#92400e;cursor:pointer" onclick="showIdentityHelper()" title="Cambiar perspectiva">
+    <span>👤</span><span id="viewer-badge-txt"></span>
+  </div>
  <!-- MOBILE RIGHT -->
  <div id="mob-hd-right">
   <div id="mob-stats" style="font-size:10.5px;color:#a8906c;white-space:nowrap;background:#f9f5f0;border-radius:20px;padding:3px 9px;border:1px solid #e8ddd0">0 familiares</div>
@@ -919,8 +922,11 @@ function findDuplicates(fn,ln,bd){
 
 // ── CUSTOM MODALS (replace native confirm/alert) ──
 function showConfirm(title,body,onYes,onNo,yesLabel='Sí, continuar',noLabel='Cancelar',yesClass='pri'){
-  document.getElementById('cm-title').textContent=title;
-  document.getElementById('cm-body').innerHTML=body;
+  const _cmt=document.getElementById('cm-title');
+  const _cmb=document.getElementById('cm-body');
+  if(!_cmt||!_cmb)return;
+  _cmt.textContent=title;
+  _cmb.innerHTML=body;
   document.getElementById('cm-btns').innerHTML=`
     <button class="cm-btn" onclick="closeConfirm();${onNo?'('+onNo+')()':''}">${noLabel}</button>
     <button class="cm-btn ${yesClass}" onclick="closeConfirm();(${onYes})()">${yesLabel}</button>`;
@@ -952,7 +958,8 @@ function updateViewerBadge(){
   if(!el)return;
   if(p&&fullName(p)!=='Sin nombre'){
     el.textContent=`Viendo como: ${p.firstName}`;
-    document.getElementById('viewer-badge-txt').textContent=`Viendo como ${p.firstName}`;
+    const _vbt=document.getElementById('viewer-badge-txt');
+    if(_vbt)_vbt.textContent=`Viendo como ${p.firstName}`;
     el.style.display='flex';
   } else {
     el.style.display='none';
@@ -1123,8 +1130,10 @@ function renderHoy(){
 
 function updateStats(){
   const f=persons.filter(p=>p.photo).length,h=persons.filter(p=>p.story?.length>10).length,ng=numGens();
-  document.getElementById('st-p').textContent=persons.length;document.getElementById('st-f').textContent=f;document.getElementById('st-h').textContent=h;
-  document.getElementById('logo-st').textContent=`${ng} generación${ng!==1?'es':''} · ${persons.length} familiares`;
+  const _stp=document.getElementById('st-p');if(_stp)_stp.textContent=persons.length;
+  const _stf=document.getElementById('st-f');if(_stf)_stf.textContent=f;
+  const _sth=document.getElementById('st-h');if(_sth)_sth.textContent=h;
+  const _lst=document.getElementById('logo-st');if(_lst)_lst.textContent=`${ng} generación${ng!==1?'es':''} · ${persons.length} familiares`;
   // Show creator name from 'me' node if it has a real name
   const meNode=persons.find(p=>p.id===viewerId)||persons.find(p=>p.id==='me');
   const creatorEl=document.getElementById('logo-creator');
